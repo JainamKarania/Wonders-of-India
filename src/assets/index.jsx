@@ -11,4 +11,5 @@ import Mumbai from "../assets/Mumbai.jpg"
 import Pune from "../assets/Pune.jpg"    
 import Tirupati from "../assets/Tirupati.jpg"
 import Hyderabad from "../assets/Hyderabad.jpg"
-export { Agra ,  Ahmedabad ,Ayodhya , Bangalore , Banner , Banner2 , Banner3 , Delhi , Hyderabad , Mumbai , Kutch , Pune , Tirupati } 
+import About from "../assets/About.jpg"
+export { Agra ,  Ahmedabad ,Ayodhya ,About, Bangalore , Banner , Banner2 , Banner3 , Delhi , Hyderabad , Mumbai , Kutch , Pune , Tirupati } 

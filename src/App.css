@@ -1,0 +1,9 @@
+body{
+    background-color: black;
+    color: white;
+}
+.bg-banner{
+    background-image: url("../src/assets/Banner2.jpg");
+    object-fit: cover;
+    background-position: center;
+}

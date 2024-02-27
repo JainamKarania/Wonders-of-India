@@ -8,7 +8,7 @@ const Hero = () => {
 
   return (
     <div className="relative bg-gray-900 overflow-hidden w-full h-screen">
-      <video autoPlay loop muted className="absolute inset-0 w-full h-full object-cover opacity-90">
+      <video autoPlay loop muted className="absolute inset-0 w-full h-full object-cover opacity-70">
         <source src={Islands} type="video/mp4" />
         Your browser does not support the video tag.
       </video>

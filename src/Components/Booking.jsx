@@ -29,7 +29,7 @@ const Booking = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex items-center justify-center">
           <div className="p-6 rounded-lg md:w-2/3 sm:w-full">
-          <h2 className="text-2xl font-bold text-center mb-8 text-white">Book your Package</h2>
+          <h2 className="text-4xl font-bold text-center mb-8 text-white">Book your Package</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="fullName" className="block text-white font-semibold mb-2">Full Name</label>

@@ -29,10 +29,10 @@ const DestinationPackages = () => {
   };
 
   return (
-    <div className="py-20 bg-white">
+    <div className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl text-center font-bold mb-12 text-black">Destination Packages</h2>
-        <div className="">
+        <h2 className="text-4xl text-center font-bold mb-12 text-white">Destination Packages</h2>
+     <div>
         <Swiper {...swiperParams}
         slidesPerView={3}
         spaceBetween={16}
@@ -44,11 +44,11 @@ const DestinationPackages = () => {
         >
           {destinations.map((destination, index) => (
             <SwiperSlide key={index} className='mb-12'>
-              <div className="bg-black p-6 rounded-lg shadow-md">
+              <div className="bg-white p-6 rounded-lg shadow-md">
                 <img src={destination.image} alt={destination.name} className="w-full h-48 object-cover mb-4 rounded-md" />
-                <h3 className="text-xl text-white font-bold mb-2">{destination.name}</h3>
-                <p className="text-white mb-4">{destination.description}</p>
-                <p className="text-lg text-white font-semibold mb-4">{destination.price}</p>
+                <h3 className="text-xl text-black font-bold mb-2">{destination.name}</h3>
+                <p className="text-black mb-4">{destination.description}</p>
+                <p className="text-lg text-black font-semibold mb-4">{destination.price}</p>
                 <button className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">View Package</button>
               </div>
             </SwiperSlide>

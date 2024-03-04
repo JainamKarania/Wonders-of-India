@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { IoCloseOutline } from "react-icons/io5";
+import { Link } from 'react-router-dom';
 const Navbar = () => {
   const [isNav, setNav] = useState(true);
 
@@ -16,17 +17,12 @@ const Navbar = () => {
         </div>
         <div className="flex items-center justify-center pt-2">
         <ul className="hidden ml-8 gap-2 space-x-4 lg:flex " >
-              <li><a href="#about" className="text-white text-lg hover:text-gray-300">About Us</a></li>
-              <li><a href="#bookings" className="text-white text-lg   hover:text-gray-300">Bookings</a></li>
-              <li><a href="#destination" className="text-white text-lg  hover:text-gray-300">Destination Packages</a></li>
-              <li><a href="#deals" className="text-white text-lg  hover:text-gray-300">Special Deals</a></li>
-              <li><a href="#contact" className="text-white text-lg  hover:text-gray-300">Contact</a></li>
+              <li><Link to="aboutpage" className="text-white text-lg hover:text-gray-300">About Us</Link></li>
+              <li><Link to="booking" className="text-white text-lg   hover:text-gray-300">Bookings</Link></li>
+              <li><Link href="destination" className="text-white text-lg  hover:text-gray-300">Destination Packages</Link></li>
+              <li><Link to="contact" className="text-white text-lg  hover:text-gray-300">Contact</Link></li>
             </ul>
         </div>
-        <div className="ml-8 hidden lg:flex pt-2 gap-4 items-center">
-        <button className="bg-white text-gray-800 py-2 px-4 rounded-full  hover:bg-gray-200">Sign In</button>
-            <button className="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600">Register</button>
-          </div>
           <div onClick={handleNav} className="block md:hidden">
         {!isNav ? (
           <IoCloseOutline color="white" size={25} />
@@ -46,13 +42,8 @@ const Navbar = () => {
         <li><a href="#about" className="p-4 text-white text-base hover:text-gray-300">About Us</a></li>
               <li><a href="#bookings" className="p-4 text-white text-base   hover:text-gray-300">Bookings</a></li>
               <li><a href="#destination" className="p-4 text-white text-base  hover:text-gray-300">Destination Packages</a></li>
-              <li><a href="#deals" className="p-4 text-white text-base  hover:text-gray-300">Special Deals</a></li>
               <li><a href="#contact" className="p-4 text-white text-base  hover:text-gray-300">Contact</a></li>
         </ul>
-        </div>
-        <div className="flex flex-col items-start gap-4 p-2">
-        <button className="bg-white text-gray-800 py-2 px-4 rounded-full  hover:bg-gray-200">Sign In</button>
-        <button className="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600">Register</button>
         </div>
        </div>
         </div>

@@ -4,6 +4,7 @@ import { BrowserRouter ,Routes, Route } from 'react-router-dom'
 import AboutPage from "./pages/AboutPage";
 import BookingPage from './pages/BookingPage';
 import ContactPage from './pages/ContactPage';
+import DestinationPage from './pages/DestinationPage';
 function App() {
  return (
     <>
@@ -11,10 +12,11 @@ function App() {
        <BrowserRouter>
        <Routes>
         <Route index element = {<HomeScreen/>} />
-        <Route path='/home' element = {<HomeScreen />}/>
-        <Route path='/aboutpage' element = {<AboutPage/>}/>
-        <Route path='/booking' element = {<BookingPage/>}/>
-        <Route path='/contact' element = {<ContactPage/>}/>
+        <Route path ='/home' element = {<HomeScreen />}/>
+        <Route path ='/aboutpage' element = {<AboutPage/>}/>
+        <Route path ='/booking' element = {<BookingPage/>}/>
+        <Route path ='/destination' element = {<DestinationPage/>}/>
+        <Route path ='/contact' element = {<ContactPage/>}/>
        </Routes>
        </BrowserRouter>
       </div>  

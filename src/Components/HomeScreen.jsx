@@ -3,7 +3,7 @@ import Navbar from "./Navbar"
 import AboutMe from "./AboutMe"
 import Booking from "./Booking"
 import Reviews from "./Reviews"
-import DestinationPackages from "./DestinationPackages"
+import Destination from "./Destination"
 import ContactUs from "./ContactUs"
 import Footer from "./Footer"
 const HomeScreen = () => {
@@ -12,7 +12,7 @@ const HomeScreen = () => {
         <Navbar />
         <Hero />
         <AboutMe/>
-        <DestinationPackages />
+        <Destination />
         <Reviews />
         <Booking />
         <ContactUs/>

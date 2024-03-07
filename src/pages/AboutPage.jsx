@@ -1,13 +1,13 @@
 import React from 'react'
 import Navbar from '../Components/Navbar'
 import { Banner3 } from '../assets/index'
-import DestinationPackages from '../Components/DestinationPackages'
+import Destination from '../Components/Destination'
 import Reviews from '../Components/Reviews'
 import Footer from '../Components/Footer'
 import ContactUs from '../Components/ContactUs'
 const AboutPage = () => {
   return (
-    <div id='aboutpage'>
+    <div>
         <Navbar />
         <div className="relative overflow-hidden w-full h-screen">
         <div>
@@ -27,7 +27,7 @@ const AboutPage = () => {
         </div>
       </div>
     </div>
-    <DestinationPackages />
+    <Destination />
     <Reviews/>
     <ContactUs/>
     <Footer/>

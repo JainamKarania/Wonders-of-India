@@ -17,10 +17,10 @@ const Navbar = () => {
         </div>
         <div className="flex items-center justify-center pt-2">
         <ul className="hidden ml-8 gap-2 space-x-4 lg:flex " >
-              <li><Link to="aboutpage" className="text-white text-lg hover:text-gray-300">About Us</Link></li>
-              <li><Link to="booking" className="text-white text-lg   hover:text-gray-300">Bookings</Link></li>
-              <li><Link href="destination" className="text-white text-lg  hover:text-gray-300">Destination Packages</Link></li>
-              <li><Link to="contact" className="text-white text-lg  hover:text-gray-300">Contact</Link></li>
+              <li><Link to="/aboutpage" className="text-white text-lg hover:text-gray-300">About Us</Link></li>
+              <li><Link to="/booking" className="text-white text-lg   hover:text-gray-300">Bookings</Link></li>
+              <li><Link to="/destination" className="text-white text-lg  hover:text-gray-300">Destination Packages</Link></li>
+              <li><Link to="/contact" className="text-white text-lg  hover:text-gray-300">Contact</Link></li>
             </ul>
         </div>
           <div onClick={handleNav} className="block md:hidden">

@@ -2,8 +2,7 @@ import React from 'react';
 import Islands from '../assets/Islands.mp4'
 const Hero = () => {
   const handleSearch = () => {
-    // Handle search functionality, such as redirecting to destination packages page
-    // Example: window.location.href = '/destination-packages';
+    window.location.href = "/destination";
   };
 
   return (

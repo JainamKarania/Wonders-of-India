@@ -9,8 +9,9 @@ import Delhi from "../assets/Dehli.jpg"
 import Kutch from "../assets/Kutch.jpg"    
 import Mumbai from "../assets/Mumbai.jpg"    
 import Pune from "../assets/Pune.jpg"    
-import Tirupati from "../assets/Tirupati.jpg"
 import Hyderabad from "../assets/Hyderabad.jpg"
 import About from "../assets/About.jpg"
 import Logo from "../assets/Logo.png"
-export { Agra ,  Ahmedabad ,Ayodhya ,Logo ,About, Bangalore , Banner , Banner2 , Banner3 , Delhi , Hyderabad , Mumbai , Kutch , Pune , Tirupati } 
+import Banner4 from "../assets/Banner4.webp"
+import ContactBanner from "../assets/ContactBanner.jpg"
+export { Agra , Banner4, ContactBanner,  Ahmedabad ,Ayodhya ,Logo ,About, Bangalore , Banner , Banner2 , Banner3 , Delhi , Hyderabad , Mumbai , Kutch , Pune} 

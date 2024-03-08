@@ -1,9 +1,6 @@
 import React from 'react';
 import Islands from '../assets/Islands.mp4'
 const Hero = () => {
-  const handleSearch = () => {
-    window.location.href = "/destination";
-  };
 
   return (
     <div className="relative bg-gray-900 overflow-hidden w-full h-screen">
@@ -18,7 +15,7 @@ const Hero = () => {
           <p className="text-lg text-white mb-8">Explore India with us. Find your perfect destination.</p>
           <div className="flex sm:w-1/2 w-full">
             <input type="text" placeholder="Search destinations..." className="flex-grow py-3 px-4 mr-4 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white bg-opacity-75" />
-            <button onClick={handleSearch} className="bg-blue-500 text-white py-3 px-6 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Search</button>
+            <button className="bg-blue-500 text-white py-3 px-6 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><Link to ="/booking" />Search</button>
           </div>
           </div>
         </div>

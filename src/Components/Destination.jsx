@@ -26,9 +26,6 @@ const Destination = () => {
       1280: { slidesPerView: 1 },
     },
   };
- const handlebooking = () => {
-   window.location.href = "/booking";
- }
   return (
     <section className='py-20'>
     <div className="max-w-7xl mx-auto my-12">
@@ -53,7 +50,7 @@ const Destination = () => {
                 <p className="text-white text-lg mb-4">{destination.description}</p>
               <div className="flex gap-4">
                 <button className="text-lg px-4 py-2 rounded-lg bg-blue-700 text-white font-semibold">{destination.price}</button>
-                <button onClick={handlebooking} className='text-lg px-4 rounded-lg font-semibold bg-green-600'>Book package</button>
+                <button className='text-lg px-4 rounded-lg font-semibold bg-green-600'><Link to="/booking" />Book package</button>
                </div>
               </div>
             </div>

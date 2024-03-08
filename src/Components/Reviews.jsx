@@ -59,7 +59,7 @@ const Reviews = () => {
   };
 
   return (
-    <div className="py-20">
+    <div className='pb-20'>
     <div className="container max-w-7xl px-4 mx-auto">
       <h2 className="text-4xl font-semibold text-center mb-8">Customer Reviews</h2>
       <div>

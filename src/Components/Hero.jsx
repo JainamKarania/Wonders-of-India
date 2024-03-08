@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Islands from '../assets/Islands.mp4'
 const Hero = () => {
 

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link } from 'react-scroll'; // Assuming you are using React Router for navigation
-import { Logo } from '../assets/index';
+import { Link } from 'react-router-dom'; 
 const Footer = () => {
   return (
     <footer className="text-white pt-16 pb-3">
@@ -9,17 +8,17 @@ const Footer = () => {
           {/* Website name with logo */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex flex-col gap-4">
-            <a href="/" className="text-white text-2xl font-bold">Wonders of India</a>
+            <a href="/" className="text-white text-center text-2xl font-bold">Wonders of India</a>
             </div>
-            <p className="mt-4 text-gray-300">Explore the world with us!</p>
+            <p className="mt-4 text-center text-gray-300">Explore the world with us!</p>
           </div>
           {/* Navigation links */}
           <div className="flex flex-col items-center col-span-1 md:col-span-1">
             <h2 className="text-lg font-bold mb-4">Quick Links</h2>
             <nav className="space-y-2">
-              <Link to="/" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">About us</Link>
-              <Link to="/destinations" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">Destinations Packages</Link>
-              <Link to="/about" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">Booking</Link>
+              <Link to="/aboutpage" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">About us</Link>
+              <Link to="/destination" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">Destinations Packages</Link>
+              <Link to="/booking" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">Booking</Link>
               <Link to="/contact" className="block text-gray-300 text-center hover:text-white transition duration-300 cursor-pointer">Contact</Link>
             </nav>
           </div>

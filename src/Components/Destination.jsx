@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -25,7 +26,9 @@ const Destination = () => {
       1280: { slidesPerView: 1 },
     },
   };
-
+ const handlebooking = () => {
+   window.location.href = "/booking";
+ }
   return (
     <section className='py-20'>
     <div className="max-w-7xl mx-auto my-12">
@@ -48,7 +51,10 @@ const Destination = () => {
               <div className="md:w-1/2 md:ml-4">
                 <h3 className="text-3xl text-center font-semibold mb-8">{destination.name}</h3>
                 <p className="text-white text-lg mb-4">{destination.description}</p>
-                <p className="text-2xl text-white font-semibold">{destination.price}</p>
+              <div className="flex gap-4">
+                <button className="text-lg px-4 py-2 rounded-lg bg-blue-700 text-white font-semibold">{destination.price}</button>
+                <button onClick={handlebooking} className='text-lg px-4 rounded-lg font-semibold bg-green-600'>Book package</button>
+               </div>
               </div>
             </div>
           </SwiperSlide>

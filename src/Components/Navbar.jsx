@@ -9,7 +9,7 @@ const Navbar = () => {
     setNav(!isNav);
   };
   return (
-    <nav className="bg-transparent fixed top-0 left-0 right-0 z-10 py-4">
+    <nav className="bg-transparent fixed top-0 left-0 right-0 z-20 py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
         <div className="flex items-center justify-center">
@@ -39,10 +39,10 @@ const Navbar = () => {
       >
         <div className='flex flex-col'>
         <ul className="pt-20 flex flex-col gap-4 mb-8">
-        <li><a href="#about" className="p-4 text-white text-base hover:text-gray-300">About Us</a></li>
-              <li><a href="#bookings" className="p-4 text-white text-base   hover:text-gray-300">Bookings</a></li>
-              <li><a href="#destination" className="p-4 text-white text-base  hover:text-gray-300">Destination Packages</a></li>
-              <li><a href="#contact" className="p-4 text-white text-base  hover:text-gray-300">Contact</a></li>
+        <li><Link to="/aboutpage" className="text-white text-lg hover:text-gray-300">About Us</Link></li>
+              <li><Link to="/booking" className="text-white text-lg   hover:text-gray-300">Bookings</Link></li>
+              <li><Link to="/destination" className="text-white text-lg  hover:text-gray-300">Destination Packages</Link></li>
+              <li><Link to="/contact" className="text-white text-lg  hover:text-gray-300">Contact</Link></li>
         </ul>
         </div>
        </div>

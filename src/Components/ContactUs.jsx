@@ -33,15 +33,15 @@ const ContactUs = () => {
                 <form onSubmit={sendEmail} ref={form} id='contactForm'>
                   <div className="mb-4">
                     <label htmlFor="name" className="block text-white font-semibold mb-2">Name</label>
-                    <input type="text" id="name" name="user_name" className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500" required />
+                    <input type="text" id="name" name="user_name" autoComplete='off' className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500" required />
                   </div>
                   <div className="mb-4">
                     <label htmlFor="email" className="block text-white font-semibold mb-2">Email Address</label>
-                    <input type="email" id="email" name="user_email"  className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500" required />
+                    <input type="email" id="email" name="user_email" autoComplete='off'  className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500" required />
                   </div>
                   <div className="mb-4">
                     <label htmlFor="message" className="block text-white font-semibold mb-2">Your Message</label>
-                    <textarea id="message" name="message"  rows="4" className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500" required></textarea>
+                    <textarea id="message" name="message" autoComplete='off'  rows="4" className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500" required></textarea>
                   </div>
                   <button type="submit"  value="Send" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Submit</button>
                 </form>

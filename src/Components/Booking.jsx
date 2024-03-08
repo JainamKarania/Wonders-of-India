@@ -36,7 +36,7 @@ const Booking = () => {
           <form onSubmit={sendEmail} ref={form}>
               <div className="mb-4">
                 <label htmlFor="fullName" className="block text-white font-semibold mb-2">Full Name</label>
-                <input type="text" id="fullName" name="fullName" className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+                <input type="text" id="fullName" name="fullName" autoComplete='off' className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
               </div>
               <div className="mb-4">
                 <label htmlFor="destinationPackage" className="block text-white font-semibold mb-2">Destination Package</label>
@@ -56,13 +56,13 @@ const Booking = () => {
               
               <div className="flex justify-center items-center gap-4 mb-4">
                 <label htmlFor="adults" className="block text-white font-semibold mb-2">Adults</label>
-                <input type="number" id="adults" name="adults" className="w-full px-4 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:border-blue-500" />
+                <input type="number" id="adults" min={0} max={50} name="adults" className="w-full px-4 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:border-blue-500" />
                 <label htmlFor="children" className="block text-white font-semibold mb-2">Children</label>
-                <input type="number" id="children" name="children" className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+                <input type="number" id="children" min={0} max={50} name="children" className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
               </div>
               <div className="mb-4">
                 <label htmlFor="email" className="block text-white font-semibold mb-2">Email Address</label>
-                <input type="email" id="email" name="email" className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+                <input type="email" id="email" name="email" autoComplete='off' className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
               </div>
               <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Submit</button>
             </form>

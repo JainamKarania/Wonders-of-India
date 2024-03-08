@@ -5,7 +5,7 @@ const AboutMe = () => {
     <div className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-6 rounded-lg shadow-md">
+        <div className="p-6 rounded-lg w-full shadow-md">
           <h2 className="text-5xl text-white font-bold mb-8">About Us</h2>
           <p className="text-lg text-white mb-6">
             At our travel agency, we are committed to providing exceptional travel experiences tailored to your preferences.

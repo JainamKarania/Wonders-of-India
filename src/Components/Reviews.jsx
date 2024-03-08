@@ -24,35 +24,35 @@ const Reviews = () => {
       name: 'Juan Perez',
       country: 'Spain',
       image: 'https://randomuser.me/api/portraits/men/3.jpg',
-      review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+      review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id.'
     },
     {
         id: 4,
         name: 'Juan Perez',
         country: 'Spain',
         image: 'https://randomuser.me/api/portraits/men/3.jpg',
-        review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id.'
       },
       {
         id: 5,
         name: 'Juan Perez',
         country: 'Spain',
         image: 'https://randomuser.me/api/portraits/men/3.jpg',
-        review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id.'
       },
       {
         id: 6,
         name: 'Juan Perez',
         country: 'Spain',
         image: 'https://randomuser.me/api/portraits/men/3.jpg',
-        review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        review: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est.'
       },
   ];
   const swiperParams = {
     breakpoints: {
       377 :{slidesPerView : 1},
       640: {  slidesPerView: 1 },
-      768: { slidesPerView: 2 },
+      768: { slidesPerView: 3 },
       1024: { slidesPerView: 3 },
       1280: { slidesPerView: 3},
     },
@@ -60,11 +60,10 @@ const Reviews = () => {
 
   return (
     <div className="py-20">
-    <div className="container max-w-7xl mx-auto">
+    <div className="container max-w-7xl px-4 mx-auto">
       <h2 className="text-4xl font-semibold text-center mb-8">Customer Reviews</h2>
       <div>
             <Swiper {...swiperParams}
-            slidesPerView={3}
             spaceBetween={16}
             pagination={{
               clickable: true,

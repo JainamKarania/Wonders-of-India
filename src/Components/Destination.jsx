@@ -27,7 +27,7 @@ const Destination = () => {
     },
   };
   return (
-    <section className='py-20'>
+    <section className='pb-20'>
     <div className="max-w-7xl mx-auto">
       <h2 className="text-3xl font-semibold text-center mb-8">Featured Destinations</h2>
       <Swiper {...swiperParams}

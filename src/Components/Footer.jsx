@@ -34,7 +34,7 @@ const Footer = () => {
       </div>
       {/* Copyright section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 text-center text-gray-300">
-        <p>&copy; {new Date().getFullYear()} Travel Agency. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Wonders of India. All rights reserved.</p>
       </div>
     </footer>
   );

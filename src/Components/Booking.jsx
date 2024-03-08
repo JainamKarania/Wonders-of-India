@@ -56,7 +56,7 @@ const Booking = () => {
               
               <div className="flex justify-center items-center gap-4 mb-4">
                 <label htmlFor="adults" className="block text-white font-semibold mb-2">Adults</label>
-                <input type="number" id="adults" name="adults" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+                <input type="number" id="adults" name="adults" className="w-full px-4 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:border-blue-500" />
                 <label htmlFor="children" className="block text-white font-semibold mb-2">Children</label>
                 <input type="number" id="children" name="children" className="w-full text-black px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
               </div>

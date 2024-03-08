@@ -50,7 +50,7 @@ const Destination = () => {
                 <p className="text-white text-lg mb-4">{destination.description}</p>
               <div className="flex gap-4">
                 <button className="text-lg px-4 py-2 rounded-lg bg-blue-700 text-white font-semibold">{destination.price}</button>
-                <button className='text-lg px-4 rounded-lg font-semibold bg-green-600'><Link to ='/destination'>Book package</Link></button>
+                <button className='text-lg px-4 rounded-lg font-semibold bg-green-600'><Link to ='/booking'>Book package</Link></button>
                </div>
               </div>
             </div>

@@ -16,7 +16,7 @@ const Hero = () => {
           <p className="text-lg text-white mb-8">Explore India with us. Find your perfect destination.</p>
           <div className="flex sm:w-1/2 w-full">
             <input type="text" placeholder="Search destinations..." className="flex-grow py-3 px-4 mr-4 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white bg-opacity-75" />
-            <button className="bg-blue-500 text-white py-3 px-6 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><Link to ="/booking">Search</Link></button>
+            <button className="bg-blue-500 text-white py-3 px-6 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><Link to ="/destination">Search</Link></button>
           </div>
           </div>
         </div>

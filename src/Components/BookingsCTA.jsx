@@ -116,7 +116,7 @@ export default function BookingsCTA() {
                 onClose={() => setOpenBooking(false)}
               />
 
-              <Button
+              {/* <Button
                 variant="outlined"
                 size="large"
                 startIcon={<Checklist />}
@@ -124,12 +124,12 @@ export default function BookingsCTA() {
                 className="!rounded-2xl !border-white !px-7 !py-3 !text-base !font-semibold !text-white !normal-case hover:!bg-white/10"
               >
                 Review Itinerary
-              </Button>
+              </Button> */}
 
-              <ItineraryModal
+              {/* <ItineraryModal
                 open={openItinerary}
                 onClose={() => setOpenItinerary(false)}
-              />
+              /> */}
             </div>
           </header>
 

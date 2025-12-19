@@ -1,65 +1,397 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Pagination } from 'swiper/modules';
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import "swiper/css";
+// import "swiper/css/navigation";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Button, Card, CardContent, Chip } from "@mui/material";
+import { LocationOn, LocalOffer, Visibility } from "@mui/icons-material";
 
-const Destination = () => {
-    const destinations = [
-        { name: "Mumbai", description: "Explore the vibrant city of Mumbai with our Mumbai tour package, offering an unforgettable Mumbai Darshan experience. Dive into the bustling streets and witness iconic landmarks like the Gateway of India, Marine Drive, and Elephanta Caves. Immerse yourself in the rich culture at the Siddhivinayak Temple and Haji Ali Dargah. Indulge in the flavors of Mumbai with street food delights at Chowpatty Beach and explore the bustling markets of Colaba Causeway. From the historical treasures to the modern marvels, our Mumbai tour promises a captivating journey through the heart of India's financial capital, leaving you with cherished memories for a lifetime.", image: "https://t4.ftcdn.net/jpg/02/01/18/91/360_F_201189187_HAvNKbc5dBACc8Sl0sXVv8lVbwQua0ph.jpg", price: "$500" },
-        { name: "Delhi", description: "Embark on an enriching journey through Delhi with our captivating Delhi tour package, highlighting the majestic Qutub Minar. Marvel at the towering monument, a UNESCO World Heritage Site, known for its intricate architecture and historical significance. Explore the vibrant streets of Old Delhi, discovering the bustling markets of Chandni Chowk and the grandeur of Red Fort.Visit Humayun's Tomb, a masterpiece of Mughal architecture, and experience the spiritual serenity of Jama Masjid. Delve into the rich heritage of India at the National Museum and witness the modernity of New Delhi with its iconic landmarks like India Gate and Lotus Temple.", image: "https://cdn.pixabay.com/photo/2017/03/19/08/01/qutub-minar-2155776_1280.jpg", price: "$600" },
-        { name: "Ayodhya", description: "Embark on a spiritual journey to Ayodhya with our mesmerizing tour package, featuring a divine darshan at the revered Ram Mandir. Immerse yourself in the sacred atmosphere as you witness the magnificence of Lord Ram's abode, a symbol of devotion and faith. Explore the holy city's rich heritage with visits to historic sites such as Hanuman Garhi, Kanak Bhawan, and the scenic banks of the Sarayu River. Delve into the timeless tales of the Ramayana as you stroll through the ancient streets, soaking in the spiritual essence of Ayodhya. Our Ayodhya tour package offers an unforgettable experience filled with blessings and tranquility.", image: "https://images.2moons.ai/prompt/slices/3/watermarked/ayodhya-ram-temple-photograph-realistic-hyperealistic_SOzkQ.png", price: "$450" },
-        { name: "Bangalore", description: "Experience the vibrant charm of Bangalore with our captivating tour package, offering a kaleidoscopic journey through the Garden City's enchanting sights. Explore the lush greenery of Lalbagh Botanical Garden and the tranquil ambiance of Cubbon Park, where nature flourishes amidst the bustling cityscape. Discover the architectural marvels of Vidhana Soudha and Tipu Sultan's Summer Palace, steeped in rich history and cultural heritage. Indulge in the vibrant culture and culinary delights at the bustling markets of Brigade Road and Commercial Street. From the iconic Bangalore Palace to the serene Ulsoor Lake.", image: "https://t3.ftcdn.net/jpg/04/36/67/54/360_F_436675446_jGWzkVDah3b6ONZxhhN13s6I4iFnjLGJ.jpg", price: "$550" },
-        { name: "Pune", description: "Embark on a captivating journey through Pune with our enriching tour package, unveiling the city's rich history and vibrant culture. Explore the majestic Aga Khan Palace, a symbol of India's struggle for independence, and delve into the spiritual serenity of the serene Osho Ashram. Immerse yourself in the architectural marvels of Shaniwar Wada and the intricately designed Dagdusheth Halwai Ganpati Temple. Experience the bustling energy of Pune's vibrant streets at the bustling markets of MG Road and FC Road, where culinary delights and local handicrafts abound. From the lush greenery of Parvati Hill to the tranquil ambiance of Pashan Lake.", image: "https://t4.ftcdn.net/jpg/02/87/42/67/360_F_287426729_qbmatCI3Tc8XIQ5hjUJriYZOZlVUOnb4.jpg", price: "$480" },
-        { name: "Ahmedabad", description: "Discover the vibrant city of Ahmedabad with our captivating tour package, showcasing the rich tapestry of culture, heritage, and architectural marvels. Immerse yourself in the grandeur of the Sabarmati Ashram, where the echoes of Mahatma Gandhi's teachings resonate through time. Explore the architectural splendor of the UNESCO World Heritage City with visits to the intricately carved Adalaj Stepwell and the iconic Sidi Saiyyed Mosque. Indulge in the flavors of Gujarat at the bustling Manek Chowk and relish the vibrant street art at Kala Ghoda. From the tranquil banks of the Sabarmati River to the bustling markets of Law Garden.", image: "https://images.unsplash.com/photo-1596201403089-d6cb29543f22?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YWhtZWRhYmFkfGVufDB8fDB8fHww", price: "$520" },
-        { name: "Agra", description: "Embark on a captivating journey to Agra with our enchanting tour package, offering a glimpse into the timeless beauty and grandeur of the Mughal era. Immerse yourself in the mesmerizing allure of the iconic Taj Mahal, a UNESCO World Heritage Site and one of the Seven Wonders of the World. Explore the majestic Agra Fort, steeped in rich history and architectural splendor, and marvel at the intricate craftsmanship of Itmad-ud-Daulah's Tomb. Indulge in the vibrant culture and flavors of Agra at the bustling markets of Sadar Bazaar and Kinari Bazaar. Our Agra tour package promises an unforgettable experience filled with history, heritage, and romance.", image: "https://cdn.pixabay.com/photo/2020/08/26/16/15/taj-mahal-5519945_640.jpg", price: "$700" },
-        { name: "Hyderabad", description: "Embark on an enchanting journey to Hyderabad with our captivating tour package, immersing yourself in the rich history, culture, and architectural wonders of the City of Pearls. Explore the majestic Golconda Fort, a testament to the city's glorious past, and marvel at the intricate stone carvings of the Qutb Shahi Tombs. Indulge in the royal splendor of the Chowmahalla Palace and the enchanting charm of the Charminar. Experience the vibrant bazaars of Laad Bazaar and Sultan Bazaar, where centuries-old traditions blend seamlessly with modern-day hustle and bustle. Our Hyderabad tour package promises an unforgettable adventure through the heart of Telangana's capital city.", image: "https://cdn.britannica.com/77/22877-050-9EFB35D4/Charminar-city-Hyderabad-India-Telangana.jpg", price: "$580" },
-        { name: "Kutch", description: "Embark on a mesmerizing journey to Kutch with our captivating tour package, offering a kaleidoscopic exploration of Gujarat's majestic desert landscape. Witness the ethereal beauty of the White Rann, a vast salt marsh that shimmers under the moonlight, creating a surreal spectacle. Explore the vibrant culture and heritage of the region at the Rann Utsav, a vibrant carnival of music, dance, and local craftsmanship. Delve into the ancient history of Kutch at the intricately carved Aina Mahal and the majestic Vijay Vilas Palace. From the enchanting Bhujodi village to the tranquil shores of Mandvi Beach, our Kutch tour package promises an unforgettable odyssey through this land of contrasts.", image: "https://www.gujarattourism.com/content/dam/gujrattourism/images/weekend-get-aways/great-rann-of-kutch/gallery/Great%20Rann%20Of%20Kutch%20(14).jpg", price: "$650" },
-      ];
-  const swiperParams = {
-    breakpoints: {
-      377 :{slidesPerView : 1},
-      640: { slidesPerView: 1 },
-      768: { slidesPerView: 1 },
-      1024: { slidesPerView: 1 },
-      1280: { slidesPerView: 1 },
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function DestinationSlider() {
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  const sliderRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(headingRef.current.children, {
+        opacity: 0,
+        y: 40,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+        },
+      });
+
+      gsap.from(".swiper-slide", {
+        opacity: 0,
+        y: 50,
+        duration: 0.9,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sliderRef.current,
+          start: "top 80%",
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const destinations = [
+    {
+      name: "Jaipur, Rajasthan",
+      desc: "Experience royal palaces, vibrant bazaars, and rich heritage in the Pink City.",
+      image:
+        "https://images.unsplash.com/photo-1602643163983-ed0babc39797?q=80&w=1200",
+      package: "Jaipur Royal Heritage Tour",
+      originalPrice: 34999,
+      discountedPrice: 27999,
+      tag: "Best Seller",
     },
-  };
+    {
+      name: "Goa",
+      desc: "Golden beaches, nightlife, and relaxed vibes with the perfect tropical escape.",
+      image:
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
+      package: "Goa Sun & Sand Getaway",
+      originalPrice: 29999,
+      discountedPrice: 23999,
+      tag: "Hot Deal",
+    },
+    {
+      name: "Manali, Himachal Pradesh",
+      desc: "Snow-capped mountains, adventure sports, and scenic valleys await you.",
+      image:
+        "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+      package: "Manali Himalayan Adventure Escape",
+      originalPrice: 39999,
+      discountedPrice: 31999,
+      tag: "Recommended",
+    },
+
+    {
+      name: "Mumbai, Maharashtra",
+      desc: "India’s financial capital blending colonial landmarks, Bollywood glamour, and vibrant street life.",
+      image:
+        "https://images.unsplash.com/photo-1598434192043-71111c1b3f41?q=80&w=1200",
+      package: "Mumbai City Lights Experience",
+      originalPrice: 28999,
+      discountedPrice: 22999,
+      tag: "Urban Escape",
+    },
+    {
+      name: "Kerala Backwaters",
+      desc: "Serene houseboats, lush greenery, and tranquil waterways.",
+      image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200",
+      package: "Kerala Backwaters Serenity Escape",
+      originalPrice: 36999,
+      discountedPrice: 29999,
+      tag: "Couples Favorite",
+    },
+    {
+      name: "Leh–Ladakh",
+      desc: "High-altitude deserts, monasteries, and breathtaking Himalayan landscapes.",
+      image: "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1200",
+      package: "Ladakh High-Altitude Adventure",
+      originalPrice: 49999,
+      discountedPrice: 41999,
+      tag: "Bucket List",
+    },
+    {
+      name: "Delhi",
+      desc: "A historic capital showcasing Mughal monuments, bustling markets, and modern city vibes.",
+      image:
+        "https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=1200",
+      package: "Delhi Heritage & Culture Trail",
+      originalPrice: 26999,
+      discountedPrice: 21999,
+      tag: "Historic Icon",
+    },
+    {
+      name: "Ayodhya, Uttar Pradesh",
+      desc: "A sacred spiritual destination deeply rooted in Indian mythology and cultural heritage.",
+      image:
+        "https://images.unsplash.com/photo-1702115416496-40a4d0c2d9ad?q=80&w=1200",
+      package: "Ayodhya Divine Pilgrimage Tour",
+      originalPrice: 23999,
+      discountedPrice: 18999,
+      tag: "Spiritual Journey",
+    },
+    {
+      name: "Bangalore, Karnataka",
+      desc: "India’s Silicon Valley with lush gardens, breweries, and pleasant weather year-round.",
+      image:
+        "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1200",
+      package: "Bangalore Urban Explorer Getaway",
+      originalPrice: 25999,
+      discountedPrice: 20999,
+      tag: "City Break",
+    },
+    {
+      name: "Pune, Maharashtra",
+      desc: "A perfect blend of history, education hubs, hill views, and vibrant nightlife.",
+      image:
+        "https://images.unsplash.com/photo-1603349135288-1d7e8bb3b8e3?q=80&w=1200",
+      package: "Pune Culture & Hills Retreat",
+      originalPrice: 24999,
+      discountedPrice: 19999,
+      tag: "Weekend Favorite",
+    },
+    {
+      name: "Ahmedabad, Gujarat",
+      desc: "A UNESCO heritage city known for Sabarmati Ashram, architecture, and rich traditions.",
+      image:
+        "https://images.unsplash.com/photo-1622108545213-4f5b9f2f8d7b?q=80&w=1200",
+      package: "Ahmedabad Heritage Walk Tour",
+      originalPrice: 23999,
+      discountedPrice: 18999,
+      tag: "Cultural Gem",
+    },
+    {
+      name: "Agra, Uttar Pradesh",
+      desc: "Home to the iconic Taj Mahal, symbolizing eternal love and Mughal grandeur.",
+      image:
+        "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
+      package: "Agra Taj Mahal Golden Triangle Tour",
+      originalPrice: 27999,
+      discountedPrice: 22999,
+      tag: "World Wonder",
+    },
+    {
+      name: "Hyderabad, Telangana",
+      desc: "A royal city of Nizams famous for Charminar, pearls, and world-renowned biryani.",
+      image:
+        "https://images.unsplash.com/photo-1604856420421-8fd52b9b67f8?q=80&w=1200",
+      package: "Hyderabad Royal Nizam Experience",
+      originalPrice: 26999,
+      discountedPrice: 21999,
+      tag: "Food Lover’s Pick",
+    },
+    {
+      name: "Kutch, Gujarat",
+      desc: "A white desert famous for Rann Utsav, handicrafts, and vibrant cultural festivals.",
+      image:
+        "https://images.unsplash.com/photo-1601118964938-0c9e4a06a4cf?q=80&w=1200",
+      package: "Rann of Kutch Desert Festival Tour",
+      originalPrice: 33999,
+      discountedPrice: 27999,
+      tag: "Cultural Festival",
+    },
+    {
+      name: "Varanasi, Uttar Pradesh",
+      desc: "One of the world’s oldest living cities offering sacred ghats and spiritual enlightenment.",
+      image:
+        "https://images.unsplash.com/photo-1600172454524-40c93a8e8a24?q=80&w=1200",
+      package: "Varanasi Timeless Spiritual Journey",
+      originalPrice: 25999,
+      discountedPrice: 19999,
+      tag: "Spiritual Icon",
+    },
+    {
+      name: "Udaipur, Rajasthan",
+      desc: "The romantic City of Lakes known for palaces, heritage stays, and sunset views.",
+      image:
+        "https://images.unsplash.com/photo-1609921212029-bb5a28e2dcb1?q=80&w=1200",
+      package: "Udaipur Royal Lakes & Palaces Retreat",
+      originalPrice: 32999,
+      discountedPrice: 26999,
+      tag: "Royal Luxury",
+    },
+    {
+      name: "Rishikesh, Uttarakhand",
+      desc: "The yoga capital of the world offering river rafting, meditation, and spiritual calm.",
+      image:
+        "https://images.unsplash.com/photo-1585136917971-7a8d6b3bdbfd?q=80&w=1200",
+      package: "Rishikesh Yoga & Adventure Escape",
+      originalPrice: 28999,
+      discountedPrice: 22999,
+      tag: "Wellness Retreat",
+    },
+    {
+      name: "Shimla & Kufri, Himachal Pradesh",
+      desc: "Colonial hill stations offering snowfall, toy train rides, and scenic mountain views.",
+      image:
+        "https://images.unsplash.com/photo-1593182440959-9f7e47e7b7e2?q=80&w=1200",
+      package: "Shimla Kufri Snowy Hills Getaway",
+      originalPrice: 35999,
+      discountedPrice: 29999,
+      tag: "Hill Station",
+    },
+    {
+      name: "Darjeeling, West Bengal",
+      desc: "Tea gardens, Himalayan views, and the iconic toy train charm.",
+      image:
+        "https://images.unsplash.com/photo-1580974852861-c381510bc98d?q=80&w=1200",
+      package: "Darjeeling Tea & Mountain Trails",
+      originalPrice: 36999,
+      discountedPrice: 30999,
+      tag: "Scenic Escape",
+    },
+    {
+      name: "Andaman & Nicobar Islands",
+      desc: "Pristine beaches, crystal-clear waters, coral reefs, and tropical serenity.",
+      image:
+        "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1200",
+      package: "Andaman Tropical Island Paradise",
+      originalPrice: 54999,
+      discountedPrice: 45999,
+      tag: "Island Luxury",
+    },
+    {
+      name: "Kaziranga National Park, Assam",
+      desc: "A UNESCO World Heritage site famous for one-horned rhinoceroses and wildlife safaris.",
+      image:
+        "https://images.unsplash.com/photo-1614699475490-47f0b64b9a6b?q=80&w=1200",
+      package: "Kaziranga Wildlife Safari Adventure",
+      originalPrice: 38999,
+      discountedPrice: 31999,
+      tag: "Wildlife Special",
+    },
+    {
+      name: "Mysuru, Karnataka",
+      desc: "A royal city known for Mysore Palace, yoga heritage, and Dasara celebrations.",
+      image:
+        "https://images.unsplash.com/photo-1587135941948-670b381f08ce?q=80&w=1200",
+      package: "Mysuru Royal Heritage Experience",
+      originalPrice: 25999,
+      discountedPrice: 20999,
+      tag: "Heritage City",
+    },
+    {
+      name: "Sikkim",
+      desc: "A serene Himalayan state with monasteries, alpine landscapes, and peaceful culture.",
+      image:
+        "https://images.unsplash.com/photo-1611078483046-9c8b6b6e7c53?q=80&w=1200",
+      package: "Sikkim Himalayan Serenity Tour",
+      originalPrice: 39999,
+      discountedPrice: 33999,
+      tag: "Hidden Gem",
+    },
+  ];
+
   return (
-    <section className='pb-20'>
-    <div className="max-w-7xl mx-auto">
-      <h2 className="text-3xl font-semibold text-center mb-8">Featured Destinations</h2>
-      <Swiper {...swiperParams}
-       slidesPerView={1}
-       spaceBetween={16}
-       pagination={{
-         clickable: true,
-       }}
-       modules={[Pagination]}
-       className="mySwiper"   
-       >
-        {destinations.map((destination, index) => (
-          <SwiperSlide key={index}>
-            <div className="flex flex-col md:flex-row bg-neutral-950 rounded-lg shadow-md gap-4 p-4 mb-8">
-              <div className="md:w-1/2 md:h-full">
-                <img src={destination.image} alt={destination.name} className="w-full h-96 object-cover rounded-md mb-4 md:mb-0" />
-              </div>
-              <div className="md:w-1/2 md:ml-4">
-                <h3 className="text-3xl text-center font-semibold mb-8">{destination.name}</h3>
-                <p className="text-white text-lg mb-4">{destination.description}</p>
-              <div className="flex gap-4">
-                <button className="text-lg px-4 py-2 rounded-lg bg-blue-700 text-white font-semibold">{destination.price}</button>
-                <button className='text-lg px-4 rounded-lg font-semibold bg-green-600'><Link to ='/booking'>Book package</Link></button>
-               </div>
-              </div>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
+    <section
+      ref={sectionRef}
+      aria-labelledby="popular-destinations-heading"
+      className="relative overflow-hidden bg-slate-50"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,white,transparent_70%)] opacity-60" />
+
+      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24">
+        <header
+          ref={headingRef}
+          className="mx-auto max-w-3xl text-center space-y-4"
+        >
+          <h2
+            id="popular-destinations-heading"
+            className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+          >
+            Popular Destinations in India
+          </h2>
+          <p className="text-base text-slate-600 sm:text-lg">
+            Curated Indian journeys with exclusive deals and unforgettable
+            experiences.
+          </p>
+        </header>
+
+        <div ref={sliderRef} className="mt-16">
+          <Swiper
+            modules={[Navigation, Autoplay]}
+            navigation
+            loop
+            grabCursor
+            autoplay={{
+              delay: 3500,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            spaceBetween={24}
+            slidesPerView={1}
+            breakpoints={{
+              640: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+          >
+            {destinations.map((dest) => (
+              <SwiperSlide key={dest.name}>
+                <Card
+                  elevation={0}
+                  className="group h-full overflow-hidden rounded-3xl bg-white shadow-sm transition hover:shadow-xl"
+                >
+                  <div className="relative h-52 overflow-hidden">
+                    <img
+                      src={dest.image}
+                      alt={dest.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <Chip
+                      label={dest.tag}
+                      size="small"
+                      icon={<LocalOffer />}
+                      className="!absolute left-4 top-4 !bg-amber-500 !text-white"
+                    />
+                  </div>
+
+                  <CardContent className="space-y-4 p-5">
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <LocationOn fontSize="small" />
+                      <span className="text-sm font-medium">{dest.name}</span>
+                    </div>
+
+                    <p className="text-sm text-slate-700 line-clamp-3">
+                      {dest.desc}
+                    </p>
+
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      <p className="text-sm font-semibold text-slate-900">
+                        {dest.package}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-sm line-through text-slate-400">
+                          ₹{dest.originalPrice.toLocaleString()}
+                        </span>
+                        <span className="text-lg font-bold text-emerald-600">
+                          ₹{dest.discountedPrice.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<LocalOffer />}
+                        className="!rounded-xl !bg-slate-900 !px-4 !py-2 !text-xs !font-semibold !normal-case hover:!bg-black"
+                      >
+                        Book Package
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Visibility />}
+                        className="!rounded-xl !border-slate-900 !px-4 !py-2 !text-xs !font-semibold !text-slate-900 !normal-case hover:!bg-slate-100"
+                      >
+                        View Itinerary
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      </div>
     </section>
   );
-};
-
-export default Destination;
+}

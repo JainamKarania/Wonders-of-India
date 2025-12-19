@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { Link } from "react-router-dom";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@mui/material";
 import { FlightTakeoff, Explore } from "@mui/icons-material";
@@ -94,23 +95,23 @@ export default function CTA() {
               ref={buttonsRef}
               className="flex flex-wrap items-center gap-4"
             >
-              <Button
+              <Link to ="/destination"
                 variant="contained"
                 size="large"
                 startIcon={<Explore />}
                 className="!rounded-2xl !bg-gray-900 !px-6 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
               >
                 Explore Packages
-              </Button>
+              </Link>
 
-              <Button
+              {/* <Button
                 variant="outlined"
                 size="large"
                 startIcon={<FlightTakeoff />}
                 className="!rounded-2xl !border-white !px-6 !py-3 !text-base !font-semibold !text-white !normal-case hover:!bg-white/10"
               >
                 Plan My Trip
-              </Button>
+              </Button> */}
             </div>
           </header>
 

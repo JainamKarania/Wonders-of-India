@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import "swiper/css";
 // import "swiper/css/navigation";
@@ -8,6 +8,7 @@ import { LocationOn, LocalOffer, Visibility } from "@mui/icons-material";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
+import BookingModal from "./BookingModal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +16,8 @@ export default function DestinationSlider() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const sliderRef = useRef(null);
+
+  const [openBooking, setOpenBooking] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -91,7 +94,8 @@ export default function DestinationSlider() {
     {
       name: "Kerala Backwaters",
       desc: "Serene houseboats, lush greenery, and tranquil waterways.",
-      image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200",
+      image:
+        "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200",
       package: "Kerala Backwaters Serenity Escape",
       originalPrice: 36999,
       discountedPrice: 29999,
@@ -100,7 +104,8 @@ export default function DestinationSlider() {
     {
       name: "Leh–Ladakh",
       desc: "High-altitude deserts, monasteries, and breathtaking Himalayan landscapes.",
-      image: "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1200",
+      image:
+        "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1200",
       package: "Ladakh High-Altitude Adventure",
       originalPrice: 49999,
       discountedPrice: 41999,
@@ -370,11 +375,17 @@ export default function DestinationSlider() {
                       <Button
                         variant="contained"
                         size="small"
+                        onClick={() => setOpenBooking(true)}
                         startIcon={<LocalOffer />}
                         className="!rounded-xl !bg-slate-900 !px-4 !py-2 !text-xs !font-semibold !normal-case hover:!bg-black"
                       >
                         Book Package
                       </Button>
+
+                      <BookingModal
+                        open={openBooking}
+                        onClose={() => setOpenBooking(false)}
+                      />
 
                       <Button
                         variant="outlined"

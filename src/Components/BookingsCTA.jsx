@@ -108,7 +108,7 @@ export default function BookingsCTA() {
                 onClick={() => setOpenBooking(true)}
                 className="!rounded-2xl !bg-slate-900 !px-7 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
               >
-                Proceed to Booking
+                Book Package
               </Button>
 
               <BookingModal

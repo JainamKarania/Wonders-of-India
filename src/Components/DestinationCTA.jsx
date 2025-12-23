@@ -124,23 +124,23 @@ export default function DestinationsCTA() {
             ref={actionRef}
             className="flex flex-wrap items-center gap-4 justify-center"
           >
-            <Button
+            {/* <Button
               variant="contained"
               size="large"
               startIcon={<Map />}
               className="!rounded-2xl !bg-slate-900 !px-7 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
             >
               View All Destinations
-            </Button>
+            </Button> */}
 
-            <Button
+            {/* <Button
               variant="outlined"
               size="large"
               startIcon={<LocationOn />}
               className="!rounded-2xl !border-white !px-7 !py-3 !text-base !font-semibold !text-white !normal-case hover:!bg-white/10"
             >
               Find My Destination
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

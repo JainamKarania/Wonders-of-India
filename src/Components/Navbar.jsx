@@ -39,9 +39,10 @@ const Navbar = () => {
         <ul className="hidden lg:flex items-center gap-8 text-white font-medium">
           {[
             { name: "About", path: "/aboutpage" },
-            { name: "Packages", path: "/destination" },
+            { name: "Packages & Itinearies", path: "/destination" },
             { name: "Bookings", path: "/booking" },
             { name: "Contact", path: "/contact" },
+            // { name: "Itineraries", path: "/itineary" }
           ].map((item) => (
             <li key={item.name}>
               <Link to={item.path} className="relative group">
@@ -72,9 +73,9 @@ const Navbar = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <MenuItem onClick={() => navigate("/profile")}>
+                {/* <MenuItem onClick={() => navigate("/profile")}>
                   Profile
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>

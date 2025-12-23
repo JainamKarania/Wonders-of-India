@@ -6,7 +6,11 @@ import BookingPage from "./pages/BookingPage";
 import ContactPage from "./pages/ContactPage";
 import DestinationPage from "./pages/DestinationPage";
 import Auth from "./Components/auth/Auth";
+import BookingForm from "./booking/BookingForm.jsx";
 import ProtectedRoute from "./Components/routes/ProtectedRoute.jsx";
+import Itineraries from "./Components/itinearies/Itineraries.jsx";
+import ItinerariesPage from "./pages/ItineariesPage.jsx";
+import BookingHistoryPage from "./pages/BookingHistoryPage.jsx";
 function App() {
   return (
     <>
@@ -26,9 +30,12 @@ function App() {
             <Route path="/home" element={<HomeScreen />} />
             <Route path="/aboutpage" element={<AboutPage />} />
             {/* <Route path ='/booking' element = {<BookingPage/>}/> */}
+            <Route path="/booking-form" element={<BookingForm />} />
             <Route path="/destination" element={<DestinationPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/auth" element={<Auth />}></Route>
+            <Route path="/itineary" element={<ItinerariesPage />} />
+            <Route path="/booking-history" element={<BookingHistoryPage />} />
           </Routes>
         </BrowserRouter>
       </div>

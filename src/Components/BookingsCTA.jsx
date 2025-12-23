@@ -101,7 +101,7 @@ export default function BookingsCTA() {
             </p>
 
             <div ref={actionsRef} className="flex flex-wrap gap-4 pt-2">
-              <Button
+              {/* <Button
                 variant="contained"
                 size="large"
                 startIcon={<EventAvailable />}
@@ -109,12 +109,12 @@ export default function BookingsCTA() {
                 className="!rounded-2xl !bg-slate-900 !px-7 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
               >
                 Book Package
-              </Button>
+              </Button> */}
 
-              <BookingModal
+              {/* <BookingModal
                 open={openBooking}
                 onClose={() => setOpenBooking(false)}
-              />
+              /> */}
 
               {/* <Button
                 variant="outlined"

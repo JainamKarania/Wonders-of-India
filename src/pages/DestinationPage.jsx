@@ -6,10 +6,12 @@ import DestinationCTA from '../Components/DestinationCTA'
 import ContactUs from '../Components/ContactUs'
 import Footer from '../Components/Footer'
 import { Banner4 } from '../assets/index'
+import Itineraries from '../Components/itinearies/Itineraries'
 const DestinationPage = () => {
   return (
     <div>
         <Navbar/>
+        <Itineraries/>
         <DestinationCTA/>
         <Destination/>
         <Reviews/>

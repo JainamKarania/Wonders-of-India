@@ -18,14 +18,13 @@ gsap.registerPlugin(ScrollTrigger);
 export default function DestinationSlider() {
   // const [open, setOpen] = useState(false);
   const [itineraries, setItineraries] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const sliderRef = useRef(null);
 
   // const [openBooking, setOpenBooking] = useState(false);
-
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -58,34 +57,33 @@ export default function DestinationSlider() {
   }, []);
 
   useEffect(() => {
-  const fetchItineraries = async () => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/destinations`
-      );
+    const fetchItineraries = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/destinations`
+        );
 
-      const mapped = res.data.data?.map((item, index) => ({
-        id: index + 1,
-        title: item.title,
-        locations: item.locations,   // FIXED
-        price: item.price,
-        discountedPrice: item.discountedPrice,
-        image: item.image,
-        tag: item.tag,
-      }));
+        const mapped = res.data.data?.map((item, index) => ({
+          id: index + 1,
+          title: item.title,
+          locations: item.locations, // FIXED
+          price: item.price,
+          discountedPrice: item.discountedPrice,
+          image: item.image,
+          tag: item.tag,
+        }));
 
-      setItineraries(mapped);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load itineraries");
-    } finally {
-      setLoading(false);
-    }
-  };
+        setItineraries(mapped);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load itineraries");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchItineraries();
-}, []);
-
+    fetchItineraries();
+  }, []);
 
   return (
     <section
@@ -176,16 +174,16 @@ export default function DestinationSlider() {
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                      <Link to = '/booking'>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => setOpen(true)}
-                        startIcon={<LocalOffer />}
-                        className="!rounded-xl !bg-slate-900 !px-4 !py-2 !text-xs !font-semibold !normal-case hover:!bg-black"
-                      >
-                        Book Package
-                      </Button>
+                      <Link to="/booking">
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => setOpen(true)}
+                          startIcon={<LocalOffer />}
+                          className="!rounded-xl !bg-slate-900 !px-4 !py-2 !text-xs !font-semibold !normal-case hover:!bg-black"
+                        >
+                          Book Package
+                        </Button>
                       </Link>
 
                       {/* <Suspense

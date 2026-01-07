@@ -58,39 +58,34 @@ export default function DestinationSlider() {
   }, []);
 
   useEffect(() => {
-    const fetchItineraries = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/destinations`
-        );
+  const fetchItineraries = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/destinations`
+      );
 
-        /**
-         * Map backend data → UI structure
-         */
-        const mapped = res.data.data?.map((item, index) => ({
-          id: index + 1,
-          title: item.title,
-          locations: item.name?.split(","),
-          price: item.price,
-          discountedPrice: item.discountedPrice,
-          image: item.image,
-          tag: item.tag,
-        }));
+      const mapped = res.data.data?.map((item, index) => ({
+        id: index + 1,
+        title: item.title,
+        locations: item.locations,   // FIXED
+        price: item.price,
+        discountedPrice: item.discountedPrice,
+        image: item.image,
+        tag: item.tag,
+      }));
 
-        setItineraries(mapped);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load itineraries");
-      } finally {
-        setLoading(false);
-      }
-    };
+      setItineraries(mapped);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load itineraries");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchItineraries();
-  }, []);
+  fetchItineraries();
+}, []);
 
-  if (loading) return <p className="text-center py-40">Loading itineraries…</p>;
-  if (error) return <p className="text-center py-40 text-red-500">{error}</p>; 
 
   return (
     <section

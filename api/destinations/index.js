@@ -1,4 +1,4 @@
-import { PACKAGE_DATA } from "../../data/destinations.data.js";
+import { PACKAGE_DATA } from "../../data/destination.data.js";
 
 export default function handler(req, res) {
   if (req.method !== "GET") {

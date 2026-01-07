@@ -26,6 +26,7 @@ export default function DestinationSlider() {
 
   // const [openBooking, setOpenBooking] = useState(false);
 
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(headingRef.current?.children, {
@@ -66,7 +67,7 @@ export default function DestinationSlider() {
         /**
          * Map backend data → UI structure
          */
-        const mapped = res.data.data.map((item, index) => ({
+        const mapped = res.data.data?.map((item, index) => ({
           id: index + 1,
           title: item.title,
           locations: item.name?.split(","),
@@ -135,7 +136,7 @@ export default function DestinationSlider() {
               1024: { slidesPerView: 3 },
             }}
           >
-            {itineraries.map((dest) => (
+            {itineraries?.map((dest) => (
               <SwiperSlide key={dest.title}>
                 <Card
                   elevation={0}

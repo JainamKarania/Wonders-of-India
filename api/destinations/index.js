@@ -1,4 +1,4 @@
-import destinations from "../../data/destination.data.js";
+import { PACKAGE_DATA } from "../../data/destinations.data.js";
 
 export default function handler(req, res) {
   if (req.method !== "GET") {
@@ -8,14 +8,12 @@ export default function handler(req, res) {
     });
   }
 
-  // Vercel request object uses req.headers
+  // Get host and protocol for generating full image URLs
   const host = req.headers.host;
   const protocol = req.headers["x-forwarded-proto"] || "https";
-
   const BASE_URL = `${protocol}://${host}/assets/packages/`;
 
-  // Format images
-  const formattedData = destinations.map((item) => ({
+  const formattedData = PACKAGE_DATA.map((item) => ({
     ...item,
     image: item.image ? BASE_URL + item.image : null,
   }));

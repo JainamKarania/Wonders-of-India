@@ -7,12 +7,12 @@ import {
   TextField,
   Button,
   Paper,
-  Grid,
   List,
   ListItem,
   ListItemButton,
+  InputAdornment,
 } from "@mui/material";
-import { FaPlane, FaHotel, FaUmbrellaBeach, FaHeadset } from "react-icons/fa";
+import SearchIcon from "@mui/icons-material/Search";
 import Islands from "../assets/Islands.mp4";
 
 const DESTINATIONS = [
@@ -47,14 +47,21 @@ function Hero() {
       )
     : [];
 
+  const goToDestinations = (searchValue) => {
+    const trimmed = searchValue.trim();
+    navigate(
+      trimmed ? `/destination?search=${encodeURIComponent(trimmed)}` : "/destination"
+    );
+  };
+
   const handleSelect = (value) => {
     setQuery(value);
-    navigate("/destination");
+    goToDestinations(value);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate("/destination");
+    goToDestinations(query);
   };
 
   return (
@@ -62,7 +69,8 @@ function Hero() {
       component="section"
       sx={{
         position: "relative",
-        height: "100vh",
+        height: { xs: "100dvh", md: "100vh" },
+        minHeight: 560,
         overflow: "hidden",
         bgcolor: "grey.900",
       }}
@@ -73,6 +81,8 @@ function Hero() {
         autoPlay
         loop
         muted
+        playsInline
+        preload="auto"
         sx={{
           position: "absolute",
           inset: 0,
@@ -85,6 +95,17 @@ function Hero() {
         <source src={Islands} type="video/mp4" />
       </Box>
 
+      {/* Readability overlay — darkens toward the bottom so text and the
+          search bar stay legible regardless of what the video shows */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.75) 100%)",
+        }}
+      />
+
       {/* Content */}
       <Container
         maxWidth="lg"
@@ -93,26 +114,38 @@ function Hero() {
           zIndex: 2,
           height: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          px: { xs: 2, sm: 3 },
         }}
       >
         <Box textAlign="center" width="100%">
           <Typography
             variant="h3"
-            md={{ fontSize: "3.5rem" }}
-            fontWeight={700}
+            fontWeight={800}
             color="white"
             gutterBottom
+            sx={{
+              fontSize: { xs: "2rem", sm: "2.75rem", md: "3.5rem" },
+              lineHeight: 1.15,
+              textShadow: "0 2px 24px rgba(0,0,0,0.35)",
+            }}
           >
-            Welcome to Wonders of India
+            Welcome to{" "}
+            <Box component="span" sx={{ color: "#fb923c" }}>
+              Wonders of India
+            </Box>
           </Typography>
 
           <Typography
             variant="h6"
             color="white"
-            mb={4}
-            sx={{ opacity: 0.9 }}
+            mb={{ xs: 3, sm: 4 }}
+            sx={{
+              opacity: 0.9,
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
           >
             Explore India with us. Find your perfect destination.
           </Typography>
@@ -121,32 +154,69 @@ function Hero() {
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{ maxWidth: 500, mx: "auto", position: "relative" }}
+            role="search"
+            sx={{ maxWidth: 560, mx: "auto", position: "relative" }}
           >
-            <Box display="flex">
+            <Paper
+              elevation={0}
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: "stretch",
+                gap: { xs: 1, sm: 0 },
+                p: { xs: 1, sm: 0.75 },
+                borderRadius: "16px",
+                bgcolor: "rgba(255,255,255,0.95)",
+                boxShadow:
+                  "0 8px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.4)",
+                transition: "box-shadow 0.3s",
+                "&:focus-within": {
+                  boxShadow:
+                    "0 8px 30px rgba(0,0,0,0.35), 0 0 0 2px #fb923c",
+                },
+              }}
+            >
               <TextField
                 fullWidth
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search destinations..."
                 variant="outlined"
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.85)",
-                  borderRadius: "12px 0 0 12px",
+                aria-label="Search destinations"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "grey.500" }} />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    borderRadius: "12px",
+                    bgcolor: "transparent",
+                    "& fieldset": { border: "none" },
+                  },
                 }}
               />
               <Button
                 type="submit"
-                variant="contained"
                 size="large"
                 sx={{
-                  borderRadius: "0 12px 12px 0",
-                  px: 3,
+                  borderRadius: "12px",
+                  px: 4,
+                  py: { xs: 1.25, sm: 1.5 },
+                  fontWeight: 700,
+                  letterSpacing: 0.3,
+                  color: "black",
+                  background: "linear-gradient(90deg, #fb923c 0%, #facc15 100%)",
+                  boxShadow: "none",
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #f97316 0%, #eab308 100%)",
+                    boxShadow: "none",
+                  },
                 }}
               >
                 Search
               </Button>
-            </Box>
+            </Paper>
 
             {/* Dropdown */}
             {filtered.length > 0 && (
@@ -157,12 +227,13 @@ function Hero() {
                   width: "100%",
                   mt: 1,
                   borderRadius: 2,
-                  maxHeight: 220,
+                  maxHeight: { xs: 180, sm: 220 },
                   overflowY: "auto",
                   zIndex: 10,
+                  textAlign: "left",
                 }}
               >
-                <List>
+                <List role="listbox">
                   {filtered.map((item) => (
                     <ListItem key={item} disablePadding>
                       <ListItemButton onClick={() => handleSelect(item)}>
@@ -174,39 +245,6 @@ function Hero() {
               </Paper>
             )}
           </Box>
-
-          {/* Services */}
-          {/* <Grid
-            container
-            spacing={3}
-            mt={8}
-            justifyContent="center"
-          >
-            {services.map((service) => (
-              <Grid item xs={12} sm={6} md={3} key={service.title}>
-                <Paper
-                  elevation={8}
-                  sx={{
-                    p: 3,
-                    textAlign: "center",
-                    backdropFilter: "blur(10px)",
-                    background:
-                      "rgba(255,255,255,0.35)",
-                    borderRadius: 4,
-                    transition: "0.3s",
-                    "&:hover": {
-                      transform: "translateY(-6px)",
-                    },
-                  }}
-                >
-                  <Box mb={1}>{service.icon}</Box>
-                  <Typography fontWeight={600}>
-                    {service.title}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid> */}
         </Box>
       </Container>
     </Box>
@@ -214,23 +252,3 @@ function Hero() {
 }
 
 export default Hero;
-
-/* Services Data */
-// const services = [
-//   {
-//     title: "Flight Booking",
-//     icon: <FaPlane size={42} color="#1976d2" />,
-//   },
-//   {
-//     title: "Hotel Reservations",
-//     icon: <FaHotel size={42} color="#2e7d32" />,
-//   },
-//   {
-//     title: "Tour Packages",
-//     icon: <FaUmbrellaBeach size={42} color="#ed6c02" />,
-//   },
-//   {
-//     title: "24/7 Travel Support",
-//     icon: <FaHeadset size={42} color="#9c27b0" />,
-//   },
-// ];

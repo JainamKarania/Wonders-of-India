@@ -1,16 +1,28 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { IoCloseOutline } from "react-icons/io5";
 import { Menu, MenuItem, IconButton } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
 import { useAuth } from "./context/AuthContext.jsx";
 
+// Single source of truth for nav links — used by both the desktop bar and
+// the mobile drawer so labels/paths can never drift out of sync.
+const NAV_LINKS = [
+  { name: "About", path: "/aboutpage" },
+  { name: "Packages & Itineraries", path: "/destination" },
+  { name: "Bookings", path: "/booking" },
+  { name: "Contact", path: "/contact" },
+];
+
 const Navbar = () => {
   const [isNavOpen, setNavOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const drawerRef = useRef(null);
+
+  const closeNav = () => setNavOpen(false);
 
   const handleLogout = () => {
     logout();
@@ -21,50 +33,63 @@ const Navbar = () => {
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
+  // Lock body scroll while the mobile drawer is open, and let Escape close it.
+  useEffect(() => {
+    if (!isNavOpen) return;
+
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") closeNav();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isNavOpen]);
+
+  const navLinkClass = ({ isActive }) =>
+    `relative group ${isActive ? "text-orange-400" : "text-white"}`;
+
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-black/50 text-white lg:bg-black/50 lg:backdrop-blur-lg border-b border-white/10">
+    <header className="fixed top-0 left-0 w-full z-50 bg-black/50 text-white md:backdrop-blur-lg border-b border-white/10">
       <nav
-        className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between"
+        className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between"
         aria-label="Main Navigation"
       >
         {/* Brand Logo */}
         <Link
           to="/"
-          className="text-2xl font-extrabold text-white tracking-wide"
+          className="text-xl sm:text-2xl font-extrabold text-white tracking-wide shrink-0"
         >
           Wonders <span className="text-orange-400">of India</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <ul className="hidden lg:flex items-center gap-8 text-white font-medium">
-          {[
-            { name: "About", path: "/aboutpage" },
-            { name: "Packages & Itinearies", path: "/destination" },
-            { name: "Bookings", path: "/booking" },
-            { name: "Contact", path: "/contact" },
-            // { name: "Itineraries", path: "/itineary" }
-          ].map((item) => (
-            <li key={item.name}>
-              <Link to={item.path} className="relative group">
+        {/* Desktop Navigation (tablet + up) */}
+        <ul className="hidden md:flex items-center gap-6 lg:gap-8 text-white font-medium">
+          {NAV_LINKS.map((item) => (
+            <li key={item.path}>
+              <NavLink to={item.path} className={navLinkClass}>
                 {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-orange-400 transition-all group-hover:w-full"></span>
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>
 
-        {/* Auth Section (Desktop) */}
-        <div className="hidden lg:flex items-center gap-4">
+        {/* Auth Section (tablet + up) */}
+        <div className="hidden md:flex items-center gap-4">
           {!isAuthenticated ? (
             <Link
               to="/auth"
-              className="bg-gradient-to-r from-orange-400 to-yellow-400 text-black px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition"
+              className="bg-gradient-to-r from-orange-400 to-yellow-400 text-black px-4 lg:px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition"
             >
               Login
             </Link>
           ) : (
             <>
-              <IconButton onClick={handleMenuOpen}>
+              <IconButton onClick={handleMenuOpen} aria-label="Account menu">
                 <AccountCircle className="text-white" fontSize="large" />
               </IconButton>
 
@@ -82,77 +107,82 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
-        {!isNavOpen && (
-          <button
-            className="lg:hidden text-white"
-            aria-label="Open Navigation Menu"
-            onClick={() => setNavOpen(true)}
-          >
-            <HiMenuAlt3 size={30} />
-          </button>
-        )}
+        {/* Mobile Menu Toggle (below tablet) */}
+        <button
+          className="md:hidden text-white p-1"
+          aria-label={isNavOpen ? "Close Navigation Menu" : "Open Navigation Menu"}
+          aria-expanded={isNavOpen}
+          aria-controls="mobile-nav-drawer"
+          onClick={() => setNavOpen((open) => !open)}
+        >
+          {isNavOpen ? (
+            <IoCloseOutline size={28} />
+          ) : (
+            <HiMenuAlt3 size={28} />
+          )}
+        </button>
       </nav>
+
+      {/* Backdrop — click outside the drawer to close it */}
+      <div
+        className={`md:hidden fixed inset-0 bg-black/60 transition-opacity duration-300 ${
+          isNavOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={closeNav}
+        aria-hidden="true"
+      />
 
       {/* Mobile Navigation Drawer */}
       <aside
-        className={`fixed top-0 left-0 h-full w-3/4 max-w-xs bg-black text-white p-6 transform transition-transform duration-500 ${
+        id="mobile-nav-drawer"
+        ref={drawerRef}
+        className={`md:hidden fixed top-0 left-0 h-full w-4/5 max-w-xs bg-black text-white p-6 transform transition-transform duration-300 ease-out ${
           isNavOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-label="Mobile Navigation"
+        aria-hidden={!isNavOpen}
       >
-        <div className="flex justify-between items-center mb-12">
-          <Link
-            to="/"
-            onClick={() => setNavOpen(false)}
-            className="text-2xl font-bold"
-          >
+        <div className="flex justify-between items-center mb-10">
+          <Link to="/" onClick={closeNav} className="text-xl font-bold">
             Wonders <span className="text-orange-400">of India</span>
           </Link>
           <IoCloseOutline
-            size={30}
+            size={28}
             className="cursor-pointer"
-            onClick={() => setNavOpen(false)}
+            onClick={closeNav}
+            aria-label="Close menu"
           />
         </div>
 
         <ul className="flex flex-col gap-6 text-lg">
-          <li>
-            <Link to="/aboutpage" onClick={() => setNavOpen(false)}>
-              About
-            </Link>
-          </li>
-          <li>
-            <Link to="/destination" onClick={() => setNavOpen(false)}>
-              Packages
-            </Link>
-          </li>
-          <li>
-            <Link to="/booking" onClick={() => setNavOpen(false)}>
-              Bookings
-            </Link>
-          </li>
-          <li>
-            <Link to="/contact" onClick={() => setNavOpen(false)}>
-              Contact
-            </Link>
-          </li>
+          {NAV_LINKS.map((item) => (
+            <li key={item.path}>
+              <NavLink to={item.path} onClick={closeNav} className={navLinkClass}>
+                {item.name}
+              </NavLink>
+            </li>
+          ))}
 
           {!isAuthenticated ? (
             <Link
               to="/auth"
-              onClick={() => setNavOpen(false)}
-              className="mt-6 bg-white text-black py-2 rounded-lg text-center font-semibold"
+              onClick={closeNav}
+              className="mt-4 bg-white text-black py-2 rounded-lg text-center font-semibold"
             >
               Login
             </Link>
           ) : (
-            <button
-              onClick={handleLogout}
-              className="mt-6 bg-red-500 py-2 rounded-lg font-semibold"
-            >
-              Logout
-            </button>
+            <>
+              <NavLink to="/profile" onClick={closeNav} className={navLinkClass}>
+                Profile
+              </NavLink>
+              <button
+                onClick={handleLogout}
+                className="mt-2 bg-red-500 py-2 rounded-lg font-semibold text-left px-3"
+              >
+                Logout
+              </button>
+            </>
           )}
         </ul>
       </aside>

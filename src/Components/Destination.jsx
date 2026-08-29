@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import axios from "axios";
 import "swiper/css";
-// import "swiper/css/navigation";
+import "swiper/css/navigation";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Button, Card, CardContent, Chip } from "@mui/material";
-import { LocationOn, LocalOffer, Visibility } from "@mui/icons-material";
+import { Button, Card, CardContent, Chip, Skeleton } from "@mui/material";
+import { LocationOn, LocalOffer } from "@mui/icons-material";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -13,18 +13,13 @@ import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// const BookingModal = lazy(() => import("./BookingModal"));
-
 export default function DestinationSlider() {
-  // const [open, setOpen] = useState(false);
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const sliderRef = useRef(null);
-
-  // const [openBooking, setOpenBooking] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -54,11 +49,14 @@ export default function DestinationSlider() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [itineraries]);
 
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/destinations`
         );
@@ -66,17 +64,17 @@ export default function DestinationSlider() {
         const mapped = res.data.data?.map((item, index) => ({
           id: index + 1,
           title: item.title,
-          locations: item.locations, // FIXED
+          locations: item.locations,
           price: item.price,
           discountedPrice: item.discountedPrice,
           image: item.image,
           tag: item.tag,
         }));
 
-        setItineraries(mapped);
+        setItineraries(mapped ?? []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load itineraries");
+        setError("Failed to load itineraries. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -93,14 +91,14 @@ export default function DestinationSlider() {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,white,transparent_70%)] opacity-60" />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24">
         <header
           ref={headingRef}
           className="mx-auto max-w-3xl text-center space-y-4"
         >
           <h2
             id="popular-destinations-heading"
-            className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+            className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl"
           >
             Popular Destinations in India
           </h2>
@@ -110,109 +108,124 @@ export default function DestinationSlider() {
           </p>
         </header>
 
-        <div ref={sliderRef} className="mt-16">
-          <Swiper
-            modules={[Navigation, Autoplay]}
-            navigation
-            loop
-            grabCursor
-            autoplay={{
-              delay: 3500,
-              disableOnInteraction: false,
-              pauseOnMouseEnter: true,
-            }}
-            spaceBetween={24}
-            slidesPerView={1}
-            breakpoints={{
-              640: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-          >
-            {itineraries?.map((dest) => (
-              <SwiperSlide key={dest.title}>
-                <Card
-                  elevation={0}
-                  className="group h-full overflow-hidden rounded-3xl bg-white shadow-sm transition hover:shadow-xl"
-                >
-                  <div className="relative h-52 overflow-hidden">
-                    <img
-                      src={dest.image}
-                      alt={dest.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <Chip
-                      label={dest.tag}
-                      size="small"
-                      // icon={<LocalOffer />}
-                      className="!absolute right-4 top-4 !bg-emerald-500 !text-white"
-                    />
-                  </div>
+        <div ref={sliderRef} className="mt-12 sm:mt-16">
+          {loading && (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-3xl bg-white p-4 shadow-sm">
+                  <Skeleton variant="rounded" height={208} className="!rounded-2xl" />
+                  <Skeleton className="mt-4" width="60%" />
+                  <Skeleton width="40%" />
+                  <Skeleton variant="rounded" height={60} className="!mt-2 !rounded-xl" />
+                </div>
+              ))}
+            </div>
+          )}
 
-                  <CardContent className="space-y-4 p-5">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <LocationOn fontSize="small" />
-                      <span className="text-sm font-medium">{dest.title}</span>
-                    </div>
+          {!loading && error && (
+            <div className="mx-auto max-w-md rounded-2xl border border-red-100 bg-red-50 p-6 text-center">
+              <p className="text-sm font-medium text-red-700">{error}</p>
+            </div>
+          )}
 
-                    {/* <p className="text-sm text-slate-700 line-clamp-3">
-                      {dest.desc}
-                    </p> */}
+          {!loading && !error && itineraries.length === 0 && (
+            <div className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center">
+              <p className="text-sm font-medium text-slate-600">
+                No destinations available right now — check back soon.
+              </p>
+            </div>
+          )}
 
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-sm font-semibold text-slate-900">
-                        {dest.title}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-sm line-through text-slate-400">
-                          ₹{dest.price?.toLocaleString()}
-                        </span>
-                        <span className="text-lg font-bold text-emerald-600">
-                          ₹{dest.discountedPrice?.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
-                      <Link to="/booking">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => setOpen(true)}
-                          startIcon={<LocalOffer />}
-                          className="!rounded-xl !bg-slate-900 !px-4 !py-2 !text-xs !font-semibold !normal-case hover:!bg-black"
-                        >
-                          Book Package
-                        </Button>
-                      </Link>
-
-                      {/* <Suspense
-                        fallback={
-                          <div className="text-center py-6">Loading...</div>
-                        }
-                      >
-                        {open && (
-                          <BookingModal
-                            open={open}
-                            onClose={() => setOpen(false)}
+          {!loading && !error && itineraries.length > 0 && (
+            <div className="px-1 sm:px-8">
+              <Swiper
+                modules={[Navigation, Autoplay]}
+                navigation
+                loop
+                grabCursor
+                autoplay={{
+                  delay: 3500,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                }}
+                spaceBetween={24}
+                slidesPerView={1}
+                breakpoints={{
+                  640: { slidesPerView: 1 },
+                  768: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 },
+                }}
+                style={{
+                  "--swiper-navigation-color": "#f97316",
+                  "--swiper-navigation-size": "20px",
+                }}
+              >
+                {itineraries.map((dest) => (
+                  <SwiperSlide key={dest.id}>
+                    <Card
+                      elevation={0}
+                      className="group h-full overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition hover:shadow-xl"
+                    >
+                      <div className="relative h-48 overflow-hidden sm:h-52">
+                        <img
+                          src={dest.image}
+                          alt={dest.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        {dest.tag && (
+                          <Chip
+                            label={dest.tag}
+                            size="small"
+                            className="!absolute right-4 top-4 !bg-emerald-500 !text-white"
                           />
                         )}
-                      </Suspense> */}
+                      </div>
 
-                      {/* <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<Visibility />}
-                        className="!rounded-xl !border-slate-900 !px-4 !py-2 !text-xs !font-semibold !text-slate-900 !normal-case hover:!bg-slate-100"
-                      >
-                        View Itinerary
-                      </Button> */}
-                    </div>
-                  </CardContent>
-                </Card>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+                      <CardContent className="space-y-4 p-5">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <LocationOn fontSize="small" />
+                          <span className="text-sm font-medium">
+                            {dest.locations || dest.title}
+                          </span>
+                        </div>
+
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <p className="text-sm font-semibold text-slate-900">
+                            {dest.title}
+                          </p>
+                          <div className="mt-1 flex items-center gap-2">
+                            {dest.price && (
+                              <span className="text-sm line-through text-slate-400">
+                                ₹{dest.price.toLocaleString()}
+                              </span>
+                            )}
+                            {dest.discountedPrice && (
+                              <span className="text-lg font-bold text-emerald-600">
+                                ₹{dest.discountedPrice.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                          <Link to="/booking" className="w-full sm:w-auto">
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<LocalOffer />}
+                              className="!w-full !rounded-xl !bg-slate-900 !px-4 !py-2 !text-xs !font-semibold !normal-case hover:!bg-black sm:!w-auto"
+                            >
+                              Book Package
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -5,12 +5,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@mui/material";
 import { FlightTakeoff, Explore } from "@mui/icons-material";
 
-/**
- * CTA Component – Wonders of India
- * Tech: React, Tailwind CSS, Material UI, GSAP
- * Semantic, responsive & accessible
- */
-
 gsap.registerPlugin(ScrollTrigger);
 
 export default function CTA() {
@@ -66,17 +60,18 @@ export default function CTA() {
       aria-labelledby="cta-heading"
       className="relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-500 to-yellow-400"
     >
-      {/* Decorative background */}
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,white,transparent_60%)]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,white,transparent_60%)]"
+      />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:py-28">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          {/* Text Content */}
-          <header className="space-y-6">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-12">
+          <header className="space-y-5 sm:space-y-6">
             <h2
               ref={headingRef}
               id="cta-heading"
-              className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
+              className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
             >
               Discover the Magic of India
               <span className="block text-gray-900">with Wonders of India</span>
@@ -84,7 +79,7 @@ export default function CTA() {
 
             <p
               ref={textRef}
-              className="max-w-xl text-base leading-relaxed text-white/90 sm:text-lg"
+              className="max-w-xl text-sm leading-relaxed text-white/90 sm:text-base lg:text-lg"
             >
               From the Himalayas to the backwaters of Kerala, explore curated travel
               experiences crafted for culture lovers, adventurers, and soul seekers.
@@ -93,30 +88,33 @@ export default function CTA() {
 
             <div
               ref={buttonsRef}
-              className="flex flex-wrap items-center gap-4"
+              className="flex flex-wrap items-center gap-3 sm:gap-4"
             >
-              <Link to ="/destination"
+              <Button
+                component={Link}
+                to="/destination"
                 variant="contained"
                 size="large"
                 startIcon={<Explore />}
-                className="!rounded-2xl !bg-gray-900 !px-6 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
+                className="!rounded-2xl !bg-gray-900 !px-5 sm:!px-6 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !normal-case hover:!bg-black"
               >
                 Explore Packages
-              </Link>
+              </Button>
 
-              {/* <Button
+              <Button
+                component={Link}
+                to="/booking"
                 variant="outlined"
                 size="large"
                 startIcon={<FlightTakeoff />}
-                className="!rounded-2xl !border-white !px-6 !py-3 !text-base !font-semibold !text-white !normal-case hover:!bg-white/10"
+                className="!rounded-2xl !border-white !px-5 sm:!px-6 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !text-white !normal-case hover:!border-white hover:!bg-white/10"
               >
                 Plan My Trip
-              </Button> */}
+              </Button>
             </div>
           </header>
 
-          {/* Visual / Stats */}
-          <aside className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+          <aside className="grid grid-cols-3 gap-3 sm:gap-6">
             {[
               { label: "Destinations", value: "50+" },
               { label: "Happy Travelers", value: "10k+" },
@@ -124,12 +122,12 @@ export default function CTA() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl bg-white/90 p-6 text-center shadow-lg backdrop-blur"
+                className="rounded-2xl bg-white/90 p-3 sm:p-6 text-center shadow-lg backdrop-blur transition-transform duration-300 hover:-translate-y-1"
               >
-                <p className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                <p className="text-lg font-bold text-gray-900 sm:text-2xl lg:text-3xl">
                   {item.value}
                 </p>
-                <p className="mt-1 text-sm font-medium text-gray-600">
+                <p className="mt-1 text-xs sm:text-sm font-medium text-gray-600">
                   {item.label}
                 </p>
               </div>

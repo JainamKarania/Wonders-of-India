@@ -8,22 +8,22 @@ gsap.registerPlugin(ScrollTrigger);
 
 const partners = [
   {
-    name: "Air India",
+    name: "SkyRoute Airlines",
     icon: Flight,
     desc: "Official airline partner for domestic and international travel.",
   },
   {
-    name: "Taj Hotels",
+    name: "Azure Heritage Hotels",
     icon: Hotel,
     desc: "Luxury and heritage stays across India.",
   },
   {
-    name: "Incredible India",
+    name: "Bharat Tourism Alliance",
     icon: Public,
     desc: "Tourism partner promoting India's rich culture and heritage.",
   },
   {
-    name: "Travel Associates",
+    name: "Wanderlust Travel Partners",
     icon: Business,
     desc: "Trusted local operators ensuring seamless experiences.",
   },

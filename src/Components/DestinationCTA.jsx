@@ -21,9 +21,6 @@ const HIGHLIGHTS = [
   },
 ];
 
-// Lightweight scroll-reveal with zero extra dependencies — observes an
-// element and flips a boolean once it enters the viewport, then stops
-// watching. Pair with Tailwind transition classes for the animation.
 function useInView(threshold = 0.2) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);

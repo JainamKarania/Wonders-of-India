@@ -8,7 +8,7 @@ const BookingHero = () => {
       aria-labelledby="booking-hero-heading"
       className="relative isolate overflow-hidden"
     >
-      {/* 🌈 Background */}
+      
       <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-green-50" />
       <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />
       <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-green-200/30 blur-3xl" />
@@ -17,7 +17,7 @@ const BookingHero = () => {
       <div className="relative mx-auto max-w-7xl px-6 py-20">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           
-          {/* ================= LEFT CONTENT ================= */}
+          
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1 text-sm font-medium text-orange-700">
               <LocationOn fontSize="small" />
@@ -38,7 +38,7 @@ const BookingHero = () => {
               India — crafted just for you.
             </p>
 
-            {/* Trust Indicators */}
+            
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="flex items-center gap-3 rounded-xl bg-white/70 p-4 shadow-sm">
                 <Star className="text-yellow-500" />
@@ -65,14 +65,14 @@ const BookingHero = () => {
               </div>
             </div>
 
-            {/* CTA Hint */}
+            
             <p className="text-sm text-slate-500">
               ✨ Handcrafted itineraries • Trusted local guides • Best price
               guarantee
             </p>
           </div>
 
-          {/* ================= RIGHT FORM ================= */}
+          
           <div className="flex justify-center lg:justify-end">
             <BookingForm />
           </div>

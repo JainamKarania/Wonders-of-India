@@ -119,7 +119,7 @@ const BookingForm = () => {
 
   return (
     <div className="relative w-full max-w-md rounded-2xl bg-white p-8 shadow-xl overflow-hidden min-h-[760px]">
-      {/* STEP 1 */}
+      
       <section className={`space-y-5 transition-all duration-500 ${step === 1 ? "opacity-100 translate-x-0" : "absolute inset-0 opacity-0 -translate-x-full"}`}>
         <h2 className="text-2xl font-bold text-slate-800">Start Your Journey</h2>
         <TextField fullWidth label="From" name="from" value={booking.from} onChange={handleBookingChange} InputProps={{ startAdornment: <Route className="mr-2" /> }} />
@@ -133,7 +133,7 @@ const BookingForm = () => {
         <Button fullWidth disabled={!isStepOneValid} onClick={() => setStep(2)} className="!bg-orange-600 !text-white !py-3 !rounded-xl">Start Booking →</Button>
       </section>
 
-      {/* STEP 2 */}
+      
       <section className={`space-y-6 transition-all duration-500 ${step === 2 ? "opacity-100 translate-x-0" : "absolute inset-0 opacity-0 translate-x-full"}`}>
         <h2 className="text-2xl font-bold text-slate-800">Traveller Details</h2>
         <div className="space-y-4 rounded-xl border p-4">

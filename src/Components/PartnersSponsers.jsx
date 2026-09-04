@@ -1,38 +1,46 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import axios from "axios";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Card, CardContent } from "@mui/material";
+import { Card, CardContent, Skeleton } from "@mui/material";
 import { Business, Flight, Hotel, Public } from "@mui/icons-material";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const partners = [
-  {
-    name: "SkyRoute Airlines",
-    icon: Flight,
-    desc: "Official airline partner for domestic and international travel.",
-  },
-  {
-    name: "Azure Heritage Hotels",
-    icon: Hotel,
-    desc: "Luxury and heritage stays across India.",
-  },
-  {
-    name: "Bharat Tourism Alliance",
-    icon: Public,
-    desc: "Tourism partner promoting India's rich culture and heritage.",
-  },
-  {
-    name: "Wanderlust Travel Partners",
-    icon: Business,
-    desc: "Trusted local operators ensuring seamless experiences.",
-  },
-];
+const ICON_MAP = {
+  flight: Flight,
+  hotel: Hotel,
+  public: Public,
+  business: Business,
+};
 
 export default function PartnersSponsors() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const gridRef = useRef(null);
+  const [partners, setPartners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/partners`
+        );
+        setPartners(res.data.data ?? []);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load partners.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartners();
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -48,21 +56,23 @@ export default function PartnersSponsors() {
         },
       });
 
-      gsap.from(gridRef.current?.children, {
-        opacity: 0,
-        y: 30,
-        duration: 0.7,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
+      if (!loading && !error && partners.length > 0) {
+        gsap.from(gridRef.current?.children, {
+          opacity: 0,
+          y: 30,
+          duration: 0.7,
+          stagger: 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+          },
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, error, partners]);
 
   return (
     <section
@@ -89,26 +99,50 @@ export default function PartnersSponsors() {
           </p>
         </header>
 
-        <div
-          ref={gridRef}
-          className="mt-12 sm:mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
-        >
-          {partners.map(({ name, icon: Icon, desc }) => (
-            <Card
-              key={name}
-              elevation={0}
-              className="!rounded-2xl !border !border-slate-200 !bg-white !shadow-sm transition-all duration-300 hover:!shadow-lg hover:-translate-y-1"
-            >
-              <CardContent className="flex flex-col items-center p-6 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-                  <Icon fontSize="medium" className="text-amber-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900">{name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loading && (
+          <div className="mt-12 sm:mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rounded"
+                height={180}
+                className="!rounded-2xl"
+              />
+            ))}
+          </div>
+        )}
+
+        {!loading && error && (
+          <p className="mt-12 text-center text-slate-500">{error}</p>
+        )}
+
+        {!loading && !error && partners.length > 0 && (
+          <div
+            ref={gridRef}
+            className="mt-12 sm:mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
+          >
+            {partners.map(({ name, icon, desc }) => {
+              const Icon = ICON_MAP[icon] ?? Business;
+              return (
+                <Card
+                  key={name}
+                  elevation={0}
+                  className="!rounded-2xl !border !border-slate-200 !bg-white !shadow-sm transition-all duration-300 hover:!shadow-lg hover:-translate-y-1"
+                >
+                  <CardContent className="flex flex-col items-center p-6 text-center">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+                      <Icon fontSize="medium" className="text-amber-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900">{name}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                      {desc}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

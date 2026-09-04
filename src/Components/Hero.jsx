@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -13,38 +13,46 @@ import {
   InputAdornment,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import axios from "axios";
 import Islands from "../assets/Islands.mp4";
-
-const DESTINATIONS = [
-  "Mumbai",
-  "Delhi",
-  "Ayodhya",
-  "Bangalore",
-  "Pune",
-  "Ahmedabad",
-  "Agra",
-  "Hyderabad",
-  "Kutch",
-  "Varanasi",
-  "Udaipur",
-  "Rishikesh",
-  "Leh–Ladakh",
-  "Shimla & Kufri",
-  "Darjeeling",
-  "Andaman & Nicobar Islands",
-  "Kaziranga National Park",
-  "Mysuru",
-  "Sikkim",
-];
 
 function Hero() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [destinations, setDestinations] = useState([]);
+
+  useEffect(() => {
+    const fetchDestinationNames = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/destinations`
+        );
+        const items = res.data.data ?? [];
+
+        // `locations` may hold one place or a comma-separated few — split
+        // defensively either way, then dedupe against a fallback to `title`
+        // for any package that doesn't set locations at all.
+        const names = items.flatMap((item) => {
+          if (item.locations) {
+            return item.locations.split(",").map((loc) => loc.trim());
+          }
+          return item.title ? [item.title] : [];
+        });
+
+        setDestinations([...new Set(names)].filter(Boolean).sort());
+      } catch (err) {
+        console.error(err);
+        // Search suggestions are a nice-to-have, not critical — fail quietly
+        // and just leave the dropdown empty rather than breaking the hero.
+        setDestinations([]);
+      }
+    };
+
+    fetchDestinationNames();
+  }, []);
 
   const filtered = query
-    ? DESTINATIONS.filter((d) =>
-        d.toLowerCase().includes(query.toLowerCase())
-      )
+    ? destinations.filter((d) => d.toLowerCase().includes(query.toLowerCase()))
     : [];
 
   const goToDestinations = (searchValue) => {

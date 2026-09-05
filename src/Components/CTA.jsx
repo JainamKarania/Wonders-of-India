@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Button } from "@mui/material";
+import { Button, Skeleton } from "@mui/material";
 import { FlightTakeoff, Explore } from "@mui/icons-material";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,6 +13,31 @@ export default function CTA() {
   const headingRef = useRef(null);
   const textRef = useRef(null);
   const buttonsRef = useRef(null);
+  const statsRef = useRef(null);
+
+  const [stats, setStats] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setStatsLoading(true);
+        setStatsError(null);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/stats`
+        );
+        setStats(res.data.data ?? []);
+      } catch (err) {
+        console.error(err);
+        setStatsError("Failed to load stats.");
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -49,10 +75,24 @@ export default function CTA() {
           start: "top 80%",
         },
       });
+
+      if (!statsLoading && !statsError && stats.length > 0) {
+        gsap.from(statsRef.current?.children, {
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+          },
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [statsLoading, statsError, stats]);
 
   return (
     <section
@@ -114,25 +154,40 @@ export default function CTA() {
             </div>
           </header>
 
-          <aside className="grid grid-cols-3 gap-3 sm:gap-6">
-            {[
-              { label: "Destinations", value: "50+" },
-              { label: "Happy Travelers", value: "10k+" },
-              { label: "Years of Trust", value: "8+" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl bg-white/90 p-3 sm:p-6 text-center shadow-lg backdrop-blur transition-transform duration-300 hover:-translate-y-1"
-              >
-                <p className="text-lg font-bold text-gray-900 sm:text-2xl lg:text-3xl">
-                  {item.value}
-                </p>
-                <p className="mt-1 text-xs sm:text-sm font-medium text-gray-600">
-                  {item.label}
-                </p>
-              </div>
-            ))}
-          </aside>
+          {statsLoading && (
+            <aside className="grid grid-cols-3 gap-3 sm:gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={96}
+                  sx={{ borderRadius: "16px", bgcolor: "rgba(255,255,255,0.4)" }}
+                />
+              ))}
+            </aside>
+          )}
+
+          {!statsLoading && statsError && (
+            <p className="text-center text-white/80 text-sm">{statsError}</p>
+          )}
+
+          {!statsLoading && !statsError && stats.length > 0 && (
+            <aside ref={statsRef} className="grid grid-cols-3 gap-3 sm:gap-6">
+              {stats.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl bg-white/90 p-3 sm:p-6 text-center shadow-lg backdrop-blur transition-transform duration-300 hover:-translate-y-1"
+                >
+                  <p className="text-lg font-bold text-gray-900 sm:text-2xl lg:text-3xl">
+                    {item.value}
+                  </p>
+                  <p className="mt-1 text-xs sm:text-sm font-medium text-gray-600">
+                    {item.label}
+                  </p>
+                </div>
+              ))}
+            </aside>
+          )}
         </div>
       </div>
     </section>

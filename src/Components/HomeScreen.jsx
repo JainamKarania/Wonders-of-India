@@ -9,7 +9,7 @@ import Footer from "./Footer"
 import PartnerSponsers from "./PartnersSponsers"
 import Services from "./Services"
 import CTA from "./CTA"
-import { HomeHero } from "./HomeHero"
+// import { HomeHero } from "./HomeHero"
 const HomeScreen = () => {
   return (
         <div>

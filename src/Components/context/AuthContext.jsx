@@ -36,10 +36,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
 
-    // Create the app-specific profile row (fullName/phone live here,
-    // separate from what Supabase Auth itself stores). Requires an RLS
-    // policy allowing a user to insert their own profile — see the SQL
-    // shared alongside this file.
+    
     if (data.user) {
       const { error: profileError } = await supabase
         .from("profiles")

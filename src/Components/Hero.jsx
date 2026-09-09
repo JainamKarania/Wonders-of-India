@@ -29,11 +29,14 @@ function Hero() {
         );
         const items = res.data.data ?? [];
 
-        // `locations` may hold one place or a comma-separated few — split
-        // defensively either way, then dedupe against a fallback to `title`
-        // for any package that doesn't set locations at all.
+        // `locations` may be an array of place names, a comma-separated
+        // string, or missing entirely — handle all three instead of
+        // assuming one shape.
         const names = items.flatMap((item) => {
-          if (item.locations) {
+          if (Array.isArray(item.locations)) {
+            return item.locations.map((loc) => String(loc).trim());
+          }
+          if (typeof item.locations === "string" && item.locations) {
             return item.locations.split(",").map((loc) => loc.trim());
           }
           return item.title ? [item.title] : [];

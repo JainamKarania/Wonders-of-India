@@ -185,7 +185,9 @@ export default function DestinationSlider() {
                         <div className="flex items-center gap-2 text-slate-600">
                           <LocationOn fontSize="small" />
                           <span className="text-sm font-medium">
-                            {dest.locations || dest.title}
+                            {Array.isArray(dest.locations)
+                              ? dest.locations.join(", ")
+                              : dest.locations || dest.title}
                           </span>
                         </div>
 

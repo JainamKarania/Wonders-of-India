@@ -1,47 +1,79 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  saveRegisteredUser,
-  getRegisteredUser,
-  saveSessionUser,
-  getSessionUser,
-  clearSessionUser,
-} from "../utils/authStorage";
+import { supabase } from "../../lib/supabaseClient";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Restore session on refresh
   useEffect(() => {
-    const sessionUser = getSessionUser();
-    if (sessionUser) setUser(sessionUser);
+    // Restore session on load/refresh
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Keep state in sync with login/logout/token refresh, including
+    // across other browser tabs.
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  const signup = (userData) => {
-    saveRegisteredUser(userData);   // mock DB
-    saveSessionUser(userData);      // auto login
-    setUser(userData);
-  };
+  const signup = async ({ name, email, password }) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    });
 
-  const login = (email, password) => {
-    const registeredUser = getRegisteredUser();
-
-    if (
-      registeredUser &&
-      registeredUser.email === email &&
-      registeredUser.password === password
-    ) {
-      saveSessionUser(registeredUser);
-      setUser(registeredUser);
-      return true;
+    if (error) {
+      return { success: false, error: error.message };
     }
-    return false;
+
+    // Create the app-specific profile row (fullName/phone live here,
+    // separate from what Supabase Auth itself stores). Requires an RLS
+    // policy allowing a user to insert their own profile — see the SQL
+    // shared alongside this file.
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({ id: data.user.id, full_name: name });
+
+      if (profileError) {
+        console.error("Failed to create profile row:", profileError);
+      }
+    }
+
+    return {
+      success: true,
+      // If email confirmation is required, Supabase returns a user but
+      // no session yet — the caller needs to know this to avoid treating
+      // signup as an immediate login.
+      needsEmailConfirmation: !data.session,
+    };
   };
 
-  const logout = () => {
-    clearSessionUser(); // DO NOT delete registered user
-    setUser(null);
+  const login = async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
@@ -49,6 +81,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         isAuthenticated: !!user,
+        loading,
         signup,
         login,
         logout,

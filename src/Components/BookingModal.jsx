@@ -3,7 +3,7 @@ import { useState } from "react";
 import {useNavigate } from "react-router-dom";
 import ModalWrapper from "./ModalWrapper";
 import BookingForm from "../booking/BookingForm";
-import AddPersonModal from "../booking/AddPersonModal";
+// import AddPersonModal from "../booking/AddPersonModal";
 import PriceSummary from "../booking/PriceSummary";
 import useBooking from "../hooks/useBooking";
 import { saveBooking } from "../Components/utils/bookingstorage";
@@ -56,11 +56,11 @@ const BookingModal = ({ open, onClose }) => {
         Confirm Booking
       </Button>
 
-      <AddPersonModal
+      {/* <AddPersonModal
         open={addPersonOpen}
         onClose={() => setAddPersonOpen(false)}
         onAdd={addPerson}
-      />
+      /> */}
     </ModalWrapper>
   );
 };

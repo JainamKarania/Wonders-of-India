@@ -36,16 +36,10 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
 
-    
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({ id: data.user.id, full_name: name });
-
-      if (profileError) {
-        console.error("Failed to create profile row:", profileError);
-      }
-    }
+    // Profile creation is now handled by a database trigger
+    // (on_auth_user_created) that fires whenever Supabase Auth creates a
+    // new user — this works regardless of whether email confirmation is
+    // required, unlike an insert made from here with the client SDK.
 
     return {
       success: true,

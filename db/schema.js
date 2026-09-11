@@ -65,6 +65,7 @@ export const bookings = pgTable("bookings", {
   destinationId: integer("destination_id")
     .notNull()
     .references(() => destinations.id),
+  fromCity: text("from_city"),
   travelDate: timestamp("travel_date").notNull(),
   totalPrice: integer("total_price").notNull(),
   status: text("status").notNull().default("pending"),
@@ -78,4 +79,6 @@ export const travelers = pgTable("travelers", {
     .references(() => bookings.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   age: integer("age"),
+  gender: text("gender"),
+  mobile: text("mobile"),
 });

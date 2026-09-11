@@ -8,6 +8,13 @@
       "when": 1788705856003,
       "tag": "0000_perpetual_wolfpack",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789109827276,
+      "tag": "0001_brainy_zarda",
+      "breakpoints": true
     }
   ]
 }

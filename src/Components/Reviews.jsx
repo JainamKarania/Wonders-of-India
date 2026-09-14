@@ -11,7 +11,7 @@ import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import gsap from "gsap";
 
 const reviews = [
-  // 🕛 12 o’clock (Top – perfectly centered)
+  
   {
     name: "Amit Sharma",
     review: "Perfect Rajasthan tour with excellent planning.",
@@ -19,7 +19,7 @@ const reviews = [
     position: "top-[-112px] left-1/2 -translate-x-1/2",
   },
 
-  // 🕒 3 o’clock (Right – perfectly centered)
+  
   {
     name: "Neha Verma",
     review: "Kerala trip was peaceful and well organized.",
@@ -27,7 +27,7 @@ const reviews = [
     position: "top-1/2 right-[-112px] -translate-y-1/2",
   },
 
-  // 🕕 6 o’clock (Bottom – perfectly centered)
+  
   {
     name: "Rahul Mehta",
     review: "Amazing experience and great customer support.",
@@ -35,7 +35,7 @@ const reviews = [
     position: "bottom-[-112px] left-1/2 -translate-x-1/2",
   },
 
-  // 🕘 9 o’clock (Left – perfectly centered)
+  
   {
     name: "Priya Singh",
     review: "Loved the Kashmir trip. Highly recommended!",
@@ -49,7 +49,7 @@ const ReviewsCircular = () => {
   const cardsRef = useRef([]);
 
   useEffect(() => {
-    // Rotate the entire circle
+    
     gsap.to(circleRef.current, {
       rotate: 360,
       duration: 40,
@@ -58,7 +58,7 @@ const ReviewsCircular = () => {
       transformOrigin: "50% 50%",
     });
 
-    // Counter rotate cards so text stays upright
+    
     gsap.to(cardsRef.current, {
       rotate: -360,
       duration: 40,
@@ -70,7 +70,7 @@ const ReviewsCircular = () => {
 
   return (
     <section className="w-full pt-20 pb-48 bg-gradient-to-b from-orange-50 to-white">
-      {/* Header */}
+      
       <div className="text-center mb-44 px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
           Journey of Happy Travelers
@@ -83,13 +83,13 @@ const ReviewsCircular = () => {
         </p>
       </div>
 
-      {/* Circular Layout */}
+      
       <div className="hidden lg:flex justify-center items-center">
         <div
           ref={circleRef}
           className="relative w-[600px] h-[600px] rounded-full border-2 border-orange-200"
         >
-          {/* Center Card (static) */}
+          
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <Card className="w-56 h-56 rounded-full flex items-center justify-center shadow-xl bg-white">
               <CardContent className="text-center">
@@ -107,7 +107,7 @@ const ReviewsCircular = () => {
             </Card>
           </div>
 
-          {/* Reviews */}
+          
           {reviews.map((item, index) => (
             <div
               key={index}
@@ -143,7 +143,7 @@ const ReviewsCircular = () => {
         </div>
       </div>
 
-      {/* Mobile fallback */}
+      
       <div className="lg:hidden px-4 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {reviews.map((item, index) => (
           <Card key={index} className="rounded-xl shadow-md">

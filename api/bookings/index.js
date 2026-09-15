@@ -1,7 +1,7 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { bookings, travelers, destinations } from "../../db/schema.js";
-import { getUserFromRequest } from "../lib/supabaseAdmin.js";
+import { getUserFromRequest } from "../lib/supabaseadmin.js";
 
 export default async function handler(req, res) {
   const user = await getUserFromRequest(req);
@@ -30,8 +30,24 @@ export default async function handler(req, res) {
 async function handleGet(req, res, user) {
   try {
     const rows = await db
-      .select()
+      .select({
+        id: bookings.id,
+        fromCity: bookings.fromCity,
+        travelDate: bookings.travelDate,
+        totalPrice: bookings.totalPrice,
+        status: bookings.status,
+        createdAt: bookings.createdAt,
+        destination: {
+          id: destinations.id,
+          title: destinations.title,
+          locations: destinations.locations,
+          image: destinations.image,
+          price: destinations.price,
+          discountedPrice: destinations.discountedPrice,
+        },
+      })
       .from(bookings)
+      .innerJoin(destinations, eq(bookings.destinationId, destinations.id))
       .where(eq(bookings.userId, user.id))
       .orderBy(desc(bookings.createdAt));
 

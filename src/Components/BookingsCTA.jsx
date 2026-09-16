@@ -12,11 +12,6 @@ import {
   Checklist,
 } from "@mui/icons-material";
 
-/**
- * Bookings Page CTA – Wonders of India
- * Focus: Confidence, clarity, conversion-ready booking
- * Tech: React, Tailwind CSS, Material UI, GSAP
- */
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,8 +21,7 @@ export default function BookingsCTA() {
   const stepsRef = useRef(null);
   const actionsRef = useRef(null);
 
-  const [openBooking, setOpenBooking] = useState(false);
-  const [openItinerary, setOpenItinerary] = useState(false);
+  
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -99,38 +93,6 @@ export default function BookingsCTA() {
               Choose your package, customize your plan, and get ready to explore
               India with peace of mind.
             </p>
-
-            <div ref={actionsRef} className="flex flex-wrap gap-4 pt-2">
-              {/* <Button
-                variant="contained"
-                size="large"
-                startIcon={<EventAvailable />}
-                onClick={() => setOpenBooking(true)}
-                className="!rounded-2xl !bg-slate-900 !px-7 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
-              >
-                Book Package
-              </Button> */}
-
-              {/* <BookingModal
-                open={openBooking}
-                onClose={() => setOpenBooking(false)}
-              /> */}
-
-              {/* <Button
-                variant="outlined"
-                size="large"
-                startIcon={<Checklist />}
-                onClick={() => setOpenItinerary(true)}
-                className="!rounded-2xl !border-white !px-7 !py-3 !text-base !font-semibold !text-white !normal-case hover:!bg-white/10"
-              >
-                Review Itinerary
-              </Button> */}
-
-              {/* <ItineraryModal
-                open={openItinerary}
-                onClose={() => setOpenItinerary(false)}
-              /> */}
-            </div>
           </header>
 
           {/* Booking Assurance Steps */}

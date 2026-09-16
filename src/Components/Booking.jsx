@@ -1,5 +1,4 @@
 import React, { useRef ,useState } from 'react';
-import { Banner2 } from '../assets/index';
 import emailjs from '@emailjs/browser';
 import "../App.css"
 const Booking = () => {

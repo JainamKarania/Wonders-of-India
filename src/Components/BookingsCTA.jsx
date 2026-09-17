@@ -16,58 +16,58 @@ import {
 gsap.registerPlugin(ScrollTrigger);
 
 export default function BookingsCTA() {
-  const sectionRef = useRef(null);
-  const headerRef = useRef(null);
-  const stepsRef = useRef(null);
-  const actionsRef = useRef(null);
+  // const sectionRef = useRef(null);
+  // const headerRef = useRef(null);
+  // const stepsRef = useRef(null);
+  // const actionsRef = useRef(null);
 
   
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(headerRef.current.children, {
-        opacity: 0,
-        y: 50,
-        duration: 0.9,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
+  // useEffect(() => {
+  //   const ctx = gsap.context(() => {
+  //     gsap.from(headerRef.current.children, {
+  //       opacity: 0,
+  //       y: 50,
+  //       duration: 0.9,
+  //       stagger: 0.2,
+  //       ease: "power3.out",
+  //       scrollTrigger: {
+  //         trigger: sectionRef.current,
+  //         start: "top 80%",
+  //       },
+  //     });
 
-      gsap.from(stepsRef.current.children, {
-        opacity: 0,
-        x: -40,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 75%",
-        },
-      });
+  //     gsap.from(stepsRef.current.children, {
+  //       opacity: 0,
+  //       x: -40,
+  //       duration: 0.8,
+  //       stagger: 0.15,
+  //       ease: "power3.out",
+  //       scrollTrigger: {
+  //         trigger: sectionRef.current,
+  //         start: "top 75%",
+  //       },
+  //     });
 
-      gsap.from(actionsRef.current.children, {
-        opacity: 0,
-        scale: 0.9,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "back.out(1.6)",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-        },
-      });
-    }, sectionRef);
+  //     gsap.from(actionsRef.current.children, {
+  //       opacity: 0,
+  //       scale: 0.9,
+  //       duration: 0.8,
+  //       stagger: 0.2,
+  //       ease: "back.out(1.6)",
+  //       scrollTrigger: {
+  //         trigger: sectionRef.current,
+  //         start: "top 70%",
+  //       },
+  //     });
+  //   }, sectionRef);
 
-    return () => ctx.revert();
-  }, []);
+  //   return () => ctx.revert();
+  // }, []);
 
   return (
     <section
-      ref={sectionRef}
+      // ref={sectionRef}
       aria-labelledby="booking-cta-heading"
       className="relative overflow-hidden bg-gradient-to-br from-rose-600 via-red-600 to-orange-500"
     >
@@ -77,7 +77,9 @@ export default function BookingsCTA() {
       <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:py-28">
         <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
           {/* Left Content */}
-          <header ref={headerRef} className="space-y-6">
+          <header 
+          // ref={headerRef} 
+          className="space-y-6">
             <h2
               id="booking-cta-heading"
               className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
@@ -96,7 +98,9 @@ export default function BookingsCTA() {
           </header>
 
           {/* Booking Assurance Steps */}
-          <aside ref={stepsRef} className="grid gap-6 sm:grid-cols-2">
+          <aside 
+          // ref={stepsRef} 
+          className="grid gap-6 sm:grid-cols-2">
             {[
               {
                 icon: <Verified fontSize="large" className="text-rose-600" />,

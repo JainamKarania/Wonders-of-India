@@ -1,7 +1,7 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { bookings, travelers, destinations } from "../../db/schema.js";
-import { getUserFromRequest } from "../lib/supabaseadmin.js";
+import { getUserFromRequest } from "../lib/supabaseAdmin.js";
 
 export default async function handler(req, res) {
   const user = await getUserFromRequest(req);

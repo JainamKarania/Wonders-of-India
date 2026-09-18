@@ -1,9 +1,3 @@
-// Run once (and again any time destination content changes):
-// node db/embedDestinations.js
-//
-// Requires VOYAGE_API_KEY in your .env. Get one free at
-// https://dash.voyageai.com
-
 import "dotenv/config";
 import { eq } from "drizzle-orm";
 import { db } from "./client.js";

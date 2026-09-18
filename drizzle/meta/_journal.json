@@ -15,6 +15,13 @@
       "when": 1789109827276,
       "tag": "0001_brainy_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789710269696,
+      "tag": "0002_rainy_iron_monger",
+      "breakpoints": true
     }
   ]
 }

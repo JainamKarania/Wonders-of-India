@@ -6,6 +6,7 @@ import {
   integer,
   real,
   timestamp,
+  vector,
 } from "drizzle-orm/pg-core";
 
 // Extends Supabase's built-in auth.users table with app-specific profile
@@ -26,6 +27,7 @@ export const destinations = pgTable("destinations", {
   discountedPrice: integer("discounted_price"),
   image: text("image"),
   tag: text("tag"),
+  embedding: vector("embedding", { dimensions: 1024 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

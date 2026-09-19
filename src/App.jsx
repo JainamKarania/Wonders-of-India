@@ -13,6 +13,8 @@ import Itineraries from "./Components/itinearies/Itineraries.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
 import ItinerariesPage from "./pages/ItineariesPage.jsx";
 import BookingHistoryPage from "./pages/BookingHistoryPage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
+import ChatWidget from "../formatting/ChatWidget.jsx";
 function App() {
   return (
     <>
@@ -40,7 +42,9 @@ function App() {
             <Route path="/booking-history" element={<BookingHistoryPage />} />
             <Route path="/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/profile" element={<UserProfilePage />} />
+            <Route path="/chat" element={<ChatPage />} />
           </Routes>
+          <ChatWidget />
         </BrowserRouter>
       </div>
     </>

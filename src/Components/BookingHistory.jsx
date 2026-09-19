@@ -9,10 +9,8 @@ import {
   Route,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { useAuth } from "../Components/context/AuthContext";
-import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 
 const formatBookingRef = (id) => `WOI-${String(id).padStart(6, "0")}`;
 
@@ -62,6 +60,13 @@ const BookingHistory = () => {
   const downloadInvoice = async (bookingId) => {
     const node = invoiceRefs.current[bookingId];
     if (!node) return;
+
+    // Loaded on demand — most visitors never click this, so there's no
+    // reason to ship these two libraries in everyone's initial bundle.
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import("html2canvas"),
+      import("jspdf"),
+    ]);
 
     const canvas = await html2canvas(node, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");

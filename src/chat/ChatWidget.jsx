@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Chat as ChatIcon, Close } from "@mui/icons-material";
-import ChatWindow from "./ChatWindow";
+import ChatWindow from "../chat/ChatWindow";
 
 const ChatWidget = () => {
   const [open, setOpen] = useState(false);

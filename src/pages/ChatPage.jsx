@@ -1,7 +1,7 @@
 import React from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import ChatWindow from "../../formatting/ChatWindow";
+import ChatWindow from "../chat/ChatWindow";
 
 const ChatPage = () => {
   return (

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Send, SmartToy, Person } from "@mui/icons-material";
 import { CircularProgress, IconButton, TextField } from "@mui/material";
-import { useChat } from "../src/chat/useChat";
+import { useChat } from "./useChat";
 
 const ChatWindow = () => {
   const { messages, sending, sendMessage } = useChat();

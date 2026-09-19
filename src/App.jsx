@@ -14,7 +14,7 @@ import UserProfilePage from "./pages/UserProfilePage.jsx";
 import ItinerariesPage from "./pages/ItineariesPage.jsx";
 import BookingHistoryPage from "./pages/BookingHistoryPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
-import ChatWidget from "../formatting/ChatWidget.jsx";
+import ChatWidget from "./chat/ChatWidget.jsx";
 function App() {
   return (
     <>

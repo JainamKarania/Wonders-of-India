@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       { role: "user", parts: [{ text: message }] },
     ];
 
-    const response = await genAI.models.generateContent({
+    const response = await generateWithRetry({
       model: CHAT_MODEL,
       contents,
       config: { systemInstruction: systemPrompt },
@@ -64,6 +64,27 @@ export default async function handler(req, res) {
       success: false,
       message: "Failed to get a response. Please try again.",
     });
+  }
+}
+
+async function generateWithRetry(params, attempt = 1) {
+  try {
+    return await genAI.models.generateContent(params);
+  } catch (err) {
+    const isOverloaded =
+      err?.status === "UNAVAILABLE" ||
+      err?.code === 503 ||
+      err?.error?.code === 503 ||
+      /UNAVAILABLE|high demand/i.test(err?.message ?? "");
+
+    if (isOverloaded && attempt <= 3) {
+      const waitMs = 1500 * attempt;
+      console.log(`Gemini overloaded — retrying in ${waitMs}ms (attempt ${attempt})`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      return generateWithRetry(params, attempt + 1);
+    }
+
+    throw err;
   }
 }
 

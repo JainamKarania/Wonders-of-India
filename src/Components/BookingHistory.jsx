@@ -9,8 +9,8 @@ import {
   Route,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import { useAuth } from "../context/AuthContext";
-import { supabase } from "../../lib/supabaseClient";
+import { useAuth } from "../Components/context/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 
 const formatBookingRef = (id) => `WOI-${String(id).padStart(6, "0")}`;
 

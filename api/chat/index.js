@@ -2,13 +2,13 @@ import { desc, eq, sql, cosineDistance } from "drizzle-orm";
 import { GoogleGenAI } from "@google/genai";
 import { db } from "../../db/client.js";
 import { destinations, bookings } from "../../db/schema.js";
-import { getUserFromRequest } from "../lib/supabaseAdmin.js";
+import { getUserFromRequest } from "../lib/supabaseadmin.js";
 
 const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const EMBED_MODEL = "voyage-4-lite";
 const EMBED_DIMENSIONS = 1024;
-const CHAT_MODEL = "gemini-2.5-pro";
+const CHAT_MODEL = "gemini-3.8-flash";
 const TOP_K_DESTINATIONS = 5;
 
 const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });

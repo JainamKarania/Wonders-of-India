@@ -12,8 +12,9 @@ import {
   Skeleton,
 } from "@mui/material";
 import { LocationOn, Email, PersonAdd, Edit } from "@mui/icons-material";
-import { useAuth } from "../Components/context/AuthContext";
-import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
+import RecommendedDestinations from "../recommendations/RecommendedDestinations";
 
 const GENDERS = ["Male", "Female", "Other"];
 const EMPTY_TRAVELER = { name: "", age: "", gender: "", mobile: "" };
@@ -234,6 +235,11 @@ const BookingForm = () => {
               )}
               <span className="text-sm text-green-600 font-medium">per person</span>
             </div>
+            <RecommendedDestinations
+              destinationId={selectedDestination.id}
+              mode="similar"
+              title="You might also like"
+            />
           </div>
         )}
 

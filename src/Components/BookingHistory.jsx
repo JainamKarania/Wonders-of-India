@@ -9,8 +9,9 @@ import {
   Route,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import { useAuth } from "../Components/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
+import RecommendedDestinations from "../recommendations/RecommendedDestinations";
 
 const formatBookingRef = (id) => `WOI-${String(id).padStart(6, "0")}`;
 
@@ -114,6 +115,8 @@ const BookingHistory = () => {
 
   return (
     <main className="space-y-12">
+      <RecommendedDestinations mode="personalized" title="Recommended for you" />
+
       {bookings.map((booking) => {
         const perPerson =
           booking.destination.discountedPrice ?? booking.destination.price ?? 0;

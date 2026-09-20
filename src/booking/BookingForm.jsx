@@ -12,8 +12,8 @@ import {
   Skeleton,
 } from "@mui/material";
 import { LocationOn, Email, PersonAdd, Edit } from "@mui/icons-material";
-import { useAuth } from "../context/AuthContext";
-import { supabase } from "../../lib/supabaseClient";
+import { useAuth } from "../Components/context/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 import RecommendedDestinations from "../recommendations/RecommendedDestinations";
 
 const GENDERS = ["Male", "Female", "Other"];

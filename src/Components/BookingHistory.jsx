@@ -9,7 +9,7 @@ import {
   Route,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Components/context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import RecommendedDestinations from "../recommendations/RecommendedDestinations";
 

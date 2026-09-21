@@ -22,6 +22,13 @@
       "when": 1789710269696,
       "tag": "0002_rainy_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789971056804,
+      "tag": "0003_safe_corsair",
+      "breakpoints": true
     }
   ]
 }

@@ -27,8 +27,19 @@ export const destinations = pgTable("destinations", {
   discountedPrice: integer("discounted_price"),
   image: text("image"),
   tag: text("tag"),
+  duration: text("duration"),
   embedding: vector("embedding", { dimensions: 1024 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const itineraryDays = pgTable("itinerary_days", {
+  id: serial("id").primaryKey(),
+  destinationId: integer("destination_id")
+    .notNull()
+    .references(() => destinations.id, { onDelete: "cascade" }),
+  dayNumber: integer("day_number").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
 });
 
 export const services = pgTable("services", {

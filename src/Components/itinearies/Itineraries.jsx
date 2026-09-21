@@ -2,11 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import axios from "axios";
-import Banner from "../../assets/Banner.jpg";
-import Banner2 from "../../assets/Dehli.jpg";
 import {
   Search,
-  LocationOn,
   CalendarToday,
   Route,
   ArrowForward,
@@ -14,7 +11,6 @@ import {
   ExpandMore,
 } from "@mui/icons-material";
 
-/* --------------------------- COMPONENT ---------------------------- */
 const Itineraries = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,19 +32,22 @@ const Itineraries = () => {
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/destinations`
         );
 
-        /**
-         * Map backend data → UI structure
-         */
-        const mapped = res.data.data.map((item, index) => ({
-          id: index + 1,
+        const mapped = (res.data.data ?? []).map((item) => ({
+          id: item.id,
           title: item.title,
           duration: "3 Days / 2 Nights",
-          route: item.route,
-          locations: item.name?.split(","),
+          route: item.locations,
+          locations: item.locations
+            ?.split(",")
+            .map((loc) => loc.trim())
+            .filter(Boolean),
           price: item.price,
           discountedPrice: item.discountedPrice,
           image: item.image,
@@ -79,20 +78,24 @@ const Itineraries = () => {
     fetchItineraries();
   }, []);
 
-  /* ------------------------ ANIMATION ------------------------ */
   useEffect(() => {
-    gsap.fromTo(
-      sectionRef?.current?.querySelectorAll(".itinerary"),
-      { opacity: 0, y: 60 },
-      { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 }
-    );
-  }, [page, activeTab]);
+    if (loading || itineraries.length === 0) return undefined;
 
-  /* ------------------------ FILTER LOGIC ------------------------ */
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        sectionRef.current?.querySelectorAll(".itinerary"),
+        { opacity: 0, y: 60 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [loading, itineraries, page, activeTab]);
+
   const filteredData = useMemo(() => {
     return itineraries.filter((pkg) => {
       if (activeTab !== "all" && pkg.type !== activeTab) return false;
-      if (bestDealOnly && pkg.badge !== "Best Deal") return false;
+      if (bestDealOnly && pkg.tag !== "Best Seller") return false;
       if (comboOnly && !pkg.combo) return false;
       if (selectedLocation && !pkg.locations?.includes(selectedLocation))
         return false;
@@ -101,9 +104,8 @@ const Itineraries = () => {
       if (pkg.discountedPrice > maxPrice) return false;
       return true;
     });
-  }, [itineraries,activeTab, bestDealOnly, comboOnly, selectedLocation, search, maxPrice]);
+  }, [itineraries, activeTab, bestDealOnly, comboOnly, selectedLocation, search, maxPrice]);
 
-  /* ------------------------ PAGINATION ------------------------ */
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = filteredData.slice(
     (page - 1) * ITEMS_PER_PAGE,
@@ -115,19 +117,13 @@ const Itineraries = () => {
 
   return (
     <section ref={sectionRef} className="bg-white text-black py-28 px-6">
-      {/* Header */}
       <header className="container max-w-7xl mx-auto mb-12">
         <h2 className="text-3xl md:text-6xl font-bold">
           Explore India Your Way
         </h2>
-        {/* <p className="text-slate-400 mt-3">
-          Filter and book curated journeys by{" "}
-          <span className="text-amber-400">Wonders of India</span>
-        </p> */}
       </header>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10">
-        {/* ================= FILTER PANEL ================= */}
         <aside
           className={`
     fixed inset-0 lg:z-40 z-50 bg-black/40 backdrop-blur-sm
@@ -143,7 +139,6 @@ const Itineraries = () => {
       lg:sticky lg:top-24
     "
           >
-            {/* Header (mobile only) */}
             <div className="flex justify-between items-center mb-6 lg:hidden">
               <h3 className="flex items-center gap-2 font-semibold text-lg">
                 <Tune /> Filters
@@ -156,9 +151,7 @@ const Itineraries = () => {
               </button>
             </div>
 
-            {/* Filters */}
             <div className="space-y-6">
-              {/* Search */}
               <div>
                 <label className="text-sm">Search Destination</label>
                 <div className="flex items-center mt-2 px-3 border rounded-xl">
@@ -172,18 +165,6 @@ const Itineraries = () => {
                 </div>
               </div>
 
-              {/* Location */}
-              {/* <select
-                className="p-2 w-full text-sm border rounded-xl"
-                onChange={(e) => setSelectedLocation(e.target.value)}
-              >
-                <option value="">All Locations</option>
-                <option>Jaipur</option>
-                <option>Udaipur</option>
-                <option>Varanasi</option>
-              </select> */}
-
-              {/* Price Checkboxes */}
               <div className="space-y-2 text-sm">
                 <p className="font-medium">Price Range</p>
                 {[
@@ -196,6 +177,7 @@ const Itineraries = () => {
                     <input
                       type="radio"
                       name="price"
+                      checked={maxPrice === p.value}
                       onChange={() => setMaxPrice(p.value)}
                     />
                     {p.label}
@@ -203,7 +185,6 @@ const Itineraries = () => {
                 ))}
               </div>
 
-              {/* Toggles */}
               <div className="space-y-2 text-sm">
                 <label className="flex items-center gap-2">
                   <input
@@ -227,7 +208,6 @@ const Itineraries = () => {
           </div>
         </aside>
 
-        {/* Mobile Filters Button */}
         <button
           onClick={() => setShowFilters(true)}
           className="lg:hidden mb-6 inline-flex items-center gap-2
@@ -237,9 +217,7 @@ const Itineraries = () => {
           Filters
         </button>
 
-        {/* ================= CONTENT ================= */}
         <main>
-          {/* Tabs */}
           <nav className="flex gap-6 mb-10">
             {["all", "best", "recommended"].map((tab) => (
               <button
@@ -263,7 +241,10 @@ const Itineraries = () => {
             ))}
           </nav>
 
-          {/* Cards */}
+          {paginatedData.length === 0 && (
+            <p className="text-slate-500">No packages match these filters.</p>
+          )}
+
           <div className="space-y-16">
             {paginatedData.map((trip) => (
               <article
@@ -276,22 +257,26 @@ const Itineraries = () => {
                   className="h-[300px] w-full object-cover rounded-3xl"
                 />
 
-                
-
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                  <h3 className="text-2xl font-semibold">{trip.title}</h3>
-                   <span className="inline-block text-xs px-3 py-1 rounded-full bg-emerald-300"> {trip.tag} </span> 
+                    <h3 className="text-2xl font-semibold">{trip.title}</h3>
+                    {trip.tag && (
+                      <span className="inline-block text-xs px-3 py-1 rounded-full bg-emerald-300">
+                        {trip.tag}
+                      </span>
+                    )}
                   </div>
                   <div className="flex gap-6 text-sm">
                     <span className="flex gap-2">
                       <CalendarToday fontSize="small" />
                       {trip.duration}
                     </span>
-                    <span className="flex gap-2">
-                      <Route fontSize="small" />
-                      {trip.route}
-                    </span>
+                    {trip.route && (
+                      <span className="flex gap-2">
+                        <Route fontSize="small" />
+                        {trip.route}
+                      </span>
+                    )}
                   </div>
 
                   <button
@@ -329,16 +314,19 @@ const Itineraries = () => {
                   <div className="flex justify-between items-center">
                     <div>
                       <span className="text-2xl font-bold">
-                        ₹{trip.discountedPrice.toLocaleString()}
+                        ₹{trip.discountedPrice?.toLocaleString()}
                       </span>
-                      <span className="line-through ml-2 text-slate-400">
-                        ₹{trip.price?.toLocaleString()}
-                      </span>
+                      {trip.price && (
+                        <span className="line-through ml-2 text-slate-400">
+                          ₹{trip.price.toLocaleString()}
+                        </span>
+                      )}
                     </div>
 
-                    <Link to = '/booking'><button className="px-6 py-3 bg-amber-400 rounded-full font-semibold">
-                      Book Package <ArrowForward />
-                    </button>
+                    <Link to={`/booking?destinationId=${trip.id}`}>
+                      <button className="px-6 py-3 bg-amber-400 rounded-full font-semibold">
+                        Book Package <ArrowForward />
+                      </button>
                     </Link>
                   </div>
                 </div>
@@ -346,20 +334,21 @@ const Itineraries = () => {
             ))}
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center gap-4 mt-16">
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={`px-4 py-2 rounded-full ${
-                  page === i + 1 ? "bg-amber-400" : "bg-slate-800 text-white"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-4 mt-16">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i + 1)}
+                  className={`px-4 py-2 rounded-full ${
+                    page === i + 1 ? "bg-amber-400" : "bg-slate-800 text-white"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </section>

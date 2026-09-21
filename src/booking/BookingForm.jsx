@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Flatpickr from "react-flatpickr";
 import toast from "react-hot-toast";
@@ -21,6 +21,7 @@ const EMPTY_TRAVELER = { name: "", age: "", gender: "", mobile: "" };
 
 const BookingForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
   const [step, setStep] = useState(1);
@@ -53,6 +54,21 @@ const BookingForm = () => {
 
     fetchDestinations();
   }, []);
+
+  // If arriving from a "Book Package" link elsewhere on the site
+  // (?destinationId=X), preselect it once the real destination list has
+  // loaded — only if the id is actually valid and nothing's picked yet.
+  useEffect(() => {
+    if (destinationsLoading || booking.destinationId) return;
+
+    const idFromUrl = searchParams.get("destinationId");
+    if (!idFromUrl) return;
+
+    const exists = destinations.some((d) => String(d.id) === idFromUrl);
+    if (exists) {
+      setBooking((prev) => ({ ...prev, destinationId: idFromUrl }));
+    }
+  }, [destinationsLoading, destinations, searchParams, booking.destinationId]);
 
   const handleBookingChange = useCallback((e) => {
     const { name, value } = e.target;

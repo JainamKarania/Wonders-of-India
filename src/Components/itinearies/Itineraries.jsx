@@ -10,6 +10,16 @@ import {
   Tune,
   ExpandMore,
 } from "@mui/icons-material";
+import { Skeleton } from "@mui/material";
+
+const PRICE_RANGES = [
+  { label: "Below ₹15,000", min: 0, max: 15000 },
+  { label: "₹15,000 – ₹20,000", min: 15000, max: 20000 },
+  { label: "₹20,000 – ₹30,000", min: 20000, max: 30000 },
+  { label: "Above ₹30,000", min: 30000, max: Infinity },
+];
+
+const ITEMS_PER_PAGE = 6;
 
 const Itineraries = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -19,15 +29,17 @@ const Itineraries = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [maxPrice, setMaxPrice] = useState(50000);
+  const [priceRange, setPriceRange] = useState(null);
   const [bestDealOnly, setBestDealOnly] = useState(false);
   const [comboOnly, setComboOnly] = useState(false);
   const [page, setPage] = useState(1);
-  const [expandedId, setExpandedId] = useState("all");
-
+  const [expandedId, setExpandedId] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const ITEMS_PER_PAGE = 2;
+  // Day-wise content is fetched lazily per card, only once expanded —
+  // not embedded upfront, since it's real per-destination data now and
+  // fetching all of it for every card on page load would be wasteful.
+  const [itineraryDetails, setItineraryDetails] = useState({});
 
   useEffect(() => {
     const fetchItineraries = async () => {
@@ -42,7 +54,7 @@ const Itineraries = () => {
         const mapped = (res.data.data ?? []).map((item) => ({
           id: item.id,
           title: item.title,
-          duration: "3 Days / 2 Nights",
+          duration: item.duration || "Duration details coming soon",
           route: item.locations,
           locations: item.locations
             ?.split(",")
@@ -59,11 +71,6 @@ const Itineraries = () => {
               ? "recommended"
               : "all",
           combo: item.tag?.toLowerCase().includes("combo"),
-          days: [
-            "Arrival & local sightseeing",
-            "Guided city exploration",
-            "Departure & leisure time",
-          ],
         }));
 
         setItineraries(mapped);
@@ -92,6 +99,12 @@ const Itineraries = () => {
     return () => ctx.revert();
   }, [loading, itineraries, page, activeTab]);
 
+  const allLocations = useMemo(() => {
+    const set = new Set();
+    itineraries.forEach((it) => it.locations?.forEach((loc) => set.add(loc)));
+    return [...set].sort();
+  }, [itineraries]);
+
   const filteredData = useMemo(() => {
     return itineraries.filter((pkg) => {
       if (activeTab !== "all" && pkg.type !== activeTab) return false;
@@ -101,16 +114,55 @@ const Itineraries = () => {
         return false;
       if (search && !pkg.title?.toLowerCase()?.includes(search?.toLowerCase()))
         return false;
-      if (pkg.discountedPrice > maxPrice) return false;
+      if (
+        priceRange &&
+        (pkg.discountedPrice < priceRange.min || pkg.discountedPrice >= priceRange.max)
+      )
+        return false;
       return true;
     });
-  }, [itineraries, activeTab, bestDealOnly, comboOnly, selectedLocation, search, maxPrice]);
+  }, [
+    itineraries,
+    activeTab,
+    bestDealOnly,
+    comboOnly,
+    selectedLocation,
+    search,
+    priceRange,
+  ]);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = filteredData.slice(
     (page - 1) * ITEMS_PER_PAGE,
     page * ITEMS_PER_PAGE
   );
+
+  const toggleExpand = async (id) => {
+    const next = expandedId === id ? null : id;
+    setExpandedId(next);
+
+    if (next && !itineraryDetails[next]) {
+      setItineraryDetails((prev) => ({ ...prev, [next]: { loading: true } }));
+
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/itinerary?destinationId=${next}`
+        );
+        if (!res.data.success) throw new Error(res.data.message);
+
+        setItineraryDetails((prev) => ({
+          ...prev,
+          [next]: { loading: false, days: res.data.data.days ?? [] },
+        }));
+      } catch (err) {
+        console.error(err);
+        setItineraryDetails((prev) => ({
+          ...prev,
+          [next]: { loading: false, error: "Failed to load day-wise details." },
+        }));
+      }
+    }
+  };
 
   if (loading) return <p className="text-center py-40">Loading itineraries…</p>;
   if (error) return <p className="text-center py-40 text-red-500">{error}</p>;
@@ -165,22 +217,44 @@ const Itineraries = () => {
                 </div>
               </div>
 
+              {allLocations.length > 0 && (
+                <div>
+                  <label className="text-sm">Location</label>
+                  <select
+                    className="p-2 mt-2 w-full text-sm border rounded-xl"
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                  >
+                    <option value="">All Locations</option>
+                    {allLocations.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="space-y-2 text-sm">
                 <p className="font-medium">Price Range</p>
-                {[
-                  { label: "Below ₹15,000", value: 15000 },
-                  { label: "₹15,000 – ₹20,000", value: 20000 },
-                  { label: "₹20,000 – ₹30,000", value: 30000 },
-                  { label: "Above ₹30,000", value: 50000 },
-                ].map((p) => (
-                  <label key={p.value} className="flex items-center gap-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="price"
+                    checked={priceRange === null}
+                    onChange={() => setPriceRange(null)}
+                  />
+                  Any price
+                </label>
+                {PRICE_RANGES.map((range) => (
+                  <label key={range.label} className="flex items-center gap-2">
                     <input
                       type="radio"
                       name="price"
-                      checked={maxPrice === p.value}
-                      onChange={() => setMaxPrice(p.value)}
+                      checked={priceRange?.label === range.label}
+                      onChange={() => setPriceRange(range)}
                     />
-                    {p.label}
+                    {range.label}
                   </label>
                 ))}
               </div>
@@ -246,92 +320,120 @@ const Itineraries = () => {
           )}
 
           <div className="space-y-16">
-            {paginatedData.map((trip) => (
-              <article
-                key={trip.id}
-                className="itinerary grid grid-cols-1 lg:grid-cols-2 gap-10"
-              >
-                <img
-                  src={trip.image}
-                  alt={trip.title}
-                  className="h-[300px] w-full object-cover rounded-3xl"
-                />
+            {paginatedData.map((trip) => {
+              const details = itineraryDetails[trip.id];
+              const isExpanded = expandedId === trip.id;
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-semibold">{trip.title}</h3>
-                    {trip.tag && (
-                      <span className="inline-block text-xs px-3 py-1 rounded-full bg-emerald-300">
-                        {trip.tag}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-6 text-sm">
-                    <span className="flex gap-2">
-                      <CalendarToday fontSize="small" />
-                      {trip.duration}
-                    </span>
-                    {trip.route && (
+              return (
+                <article
+                  key={trip.id}
+                  className="itinerary grid grid-cols-1 lg:grid-cols-2 gap-10"
+                >
+                  <img
+                    src={trip.image}
+                    alt={trip.title}
+                    className="h-[300px] w-full object-cover rounded-3xl"
+                  />
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-2xl font-semibold">{trip.title}</h3>
+                      {trip.tag && (
+                        <span className="inline-block text-xs px-3 py-1 rounded-full bg-emerald-300">
+                          {trip.tag}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-6 text-sm">
                       <span className="flex gap-2">
-                        <Route fontSize="small" />
-                        {trip.route}
+                        <CalendarToday fontSize="small" />
+                        {trip.duration}
                       </span>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      setExpandedId(expandedId === trip.id ? null : trip.id)
-                    }
-                    className="flex items-center gap-2 text-sm font-medium"
-                  >
-                    Day-wise Itinerary
-                    <ExpandMore
-                      className="transition-transform"
-                      style={{
-                        transform:
-                          expandedId === trip.id || expandedId === "all"
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                      }}
-                    />
-                  </button>
-
-                  {(expandedId === trip.id || expandedId === "all") && (
-                    <ul className="relative pl-6 space-y-3 text-sm">
-                      <span className="absolute left-[9px] top-0 h-full w-[2px] bg-slate-700" />
-                      {trip.days.map((day, idx) => (
-                        <li key={idx} className="flex gap-4">
-                          <span className="w-3 h-3 mt-1 rounded-full bg-amber-400" />{" "}
-                          <p>
-                            <strong>Day {idx + 1}:</strong> {day}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-2xl font-bold">
-                        ₹{trip.discountedPrice?.toLocaleString()}
-                      </span>
-                      {trip.price && (
-                        <span className="line-through ml-2 text-slate-400">
-                          ₹{trip.price.toLocaleString()}
+                      {trip.route && (
+                        <span className="flex gap-2">
+                          <Route fontSize="small" />
+                          {trip.route}
                         </span>
                       )}
                     </div>
 
-                    <Link to={`/booking?destinationId=${trip.id}`}>
-                      <button className="px-6 py-3 bg-amber-400 rounded-full font-semibold">
-                        Book Package <ArrowForward />
-                      </button>
-                    </Link>
+                    <button
+                      onClick={() => toggleExpand(trip.id)}
+                      className="flex items-center gap-2 text-sm font-medium"
+                    >
+                      Day-wise Itinerary
+                      <ExpandMore
+                        className="transition-transform"
+                        style={{
+                          transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                        }}
+                      />
+                    </button>
+
+                    {isExpanded && (
+                      <>
+                        {details?.loading && (
+                          <div className="space-y-3">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                              <Skeleton key={i} variant="text" height={40} />
+                            ))}
+                          </div>
+                        )}
+
+                        {details?.error && (
+                          <p className="text-sm text-red-600">{details.error}</p>
+                        )}
+
+                        {details && !details.loading && !details.error && (
+                          <>
+                            {details.days.length === 0 ? (
+                              <p className="text-sm text-slate-500">
+                                Day-wise details for this package are coming soon.
+                              </p>
+                            ) : (
+                              <ul className="relative pl-6 space-y-3 text-sm">
+                                <span className="absolute left-[9px] top-0 h-full w-[2px] bg-slate-700" />
+                                {details.days.map((day) => (
+                                  <li key={day.dayNumber} className="flex gap-4">
+                                    <span className="w-3 h-3 mt-1 rounded-full bg-amber-400" />
+                                    <p>
+                                      <strong>
+                                        Day {day.dayNumber}: {day.title}
+                                      </strong>
+                                      <br />
+                                      {day.description}
+                                    </p>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
+
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-2xl font-bold">
+                          ₹{trip.discountedPrice?.toLocaleString()}
+                        </span>
+                        {trip.price && (
+                          <span className="line-through ml-2 text-slate-400">
+                            ₹{trip.price.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+
+                      <Link to={`/booking?destinationId=${trip.id}`}>
+                        <button className="px-6 py-3 bg-amber-400 rounded-full font-semibold">
+                          Book Package <ArrowForward />
+                        </button>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
           {totalPages > 1 && (

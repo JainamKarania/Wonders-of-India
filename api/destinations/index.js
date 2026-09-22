@@ -10,7 +10,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const rows = await db.select().from(destinations);
+    const rows = await db
+      .select({
+        id: destinations.id,
+        title: destinations.title,
+        locations: destinations.locations,
+        price: destinations.price,
+        discountedPrice: destinations.discountedPrice,
+        image: destinations.image,
+        tag: destinations.tag,
+        duration: destinations.duration,
+        createdAt: destinations.createdAt,
+      })
+      .from(destinations);
 
     const host = req.headers.host;
     const protocol = req.headers["x-forwarded-proto"] || "https";

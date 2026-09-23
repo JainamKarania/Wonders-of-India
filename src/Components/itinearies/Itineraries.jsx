@@ -11,6 +11,7 @@ import {
   ExpandMore,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
+import ItineraryModal from "../ItineraryModal";
 
 const PRICE_RANGES = [
   { label: "Below ₹15,000", min: 0, max: 15000 },
@@ -40,6 +41,7 @@ const Itineraries = () => {
   // not embedded upfront, since it's real per-destination data now and
   // fetching all of it for every card on page load would be wasteful.
   const [itineraryDetails, setItineraryDetails] = useState({});
+  const [modalDestinationId, setModalDestinationId] = useState(null);
 
   useEffect(() => {
     const fetchItineraries = async () => {
@@ -424,11 +426,20 @@ const Itineraries = () => {
                         )}
                       </div>
 
-                      <Link to={`/booking?destinationId=${trip.id}`}>
-                        <button className="px-6 py-3 bg-amber-400 rounded-full font-semibold">
-                          Book Package <ArrowForward />
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setModalDestinationId(trip.id)}
+                          className="px-5 py-3 border-2 border-slate-900 rounded-full font-semibold text-sm hover:bg-slate-900 hover:text-white transition"
+                        >
+                          Review Itinerary
                         </button>
-                      </Link>
+
+                        <Link to={`/booking?destinationId=${trip.id}`}>
+                          <button className="px-6 py-3 bg-amber-400 rounded-full font-semibold">
+                            Book Package <ArrowForward />
+                          </button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -453,6 +464,12 @@ const Itineraries = () => {
           )}
         </main>
       </div>
+
+      <ItineraryModal
+        open={modalDestinationId !== null}
+        onClose={() => setModalDestinationId(null)}
+        destinationId={modalDestinationId}
+      />
     </section>
   );
 };

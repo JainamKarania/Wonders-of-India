@@ -4,7 +4,7 @@ import Itineraries from "../Components/itinearies/Itineraries";
 const ItinerariesPage = () => {
   return (
     <div>
-      <Navbar />     {/* ✅ Placed at page level */}
+      <Navbar />     
       <Itineraries />
     </div>
   );

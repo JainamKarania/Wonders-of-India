@@ -10,18 +10,28 @@ import {
   Close,
 } from "@mui/icons-material";
 import { MdDashboard } from "react-icons/md";
+import { useAuth } from "../context/AuthContext";
 
 const SideBar = () => {
   const sidebarRef = useRef(null);
   const [openSupport, setOpenSupport] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
+
+  const displayName =
+    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Traveler";
+  const initial = displayName.charAt(0).toUpperCase();
 
   useEffect(() => {
-    gsap.fromTo(
-      sidebarRef.current,
-      { x: -120, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        sidebarRef.current,
+        { x: -120, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+      );
+    });
+
+    return () => ctx.revert();
   }, []);
 
   const linkClass = ({ isActive }) =>
@@ -30,7 +40,6 @@ const SideBar = () => {
 
   return (
     <>
-      {/* Mobile Toggle Button */}
       <button
         onClick={() => setMobileOpen(true)}
         className="md:hidden fixed top-4 left-4 z-50 bg-orange-600 text-white p-2 rounded-lg shadow-lg"
@@ -39,7 +48,6 @@ const SideBar = () => {
         <Menu />
       </button>
 
-      {/* Overlay (Mobile) */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -47,7 +55,6 @@ const SideBar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         ref={sidebarRef}
         className={`
@@ -62,7 +69,6 @@ const SideBar = () => {
         `}
         aria-label="User Sidebar"
       >
-        {/* Mobile Close */}
         <button
           onClick={() => setMobileOpen(false)}
           className="md:hidden absolute top-4 right-4 z-[70]"
@@ -71,20 +77,14 @@ const SideBar = () => {
           <Close />
         </button>
 
-        {/* Profile Info */}
         <header className="flex flex-col items-center text-center mb-8 mt-6 md:mt-0">
-          <img
-            src="https://i.pravatar.cc/150?img=32"
-            alt="User profile"
-            className="w-24 h-24 rounded-full border-4 border-white shadow-md"
-          />
-          <h2 className="mt-4 text-xl font-semibold">Jainam Karania</h2>
-          <p className="text-sm opacity-90">
-            jainam@wondersofindia.com
-          </p>
+          <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-white/20 shadow-md text-3xl font-bold">
+            {initial}
+          </div>
+          <h2 className="mt-4 text-xl font-semibold capitalize">{displayName}</h2>
+          <p className="text-sm opacity-90">{user?.email}</p>
         </header>
 
-        {/* Navigation */}
         <nav className="space-y-4" role="navigation">
           <NavLink
             to="/profile"
@@ -103,7 +103,6 @@ const SideBar = () => {
             Booking History
           </NavLink>
 
-          {/* Support Dropdown */}
           <div>
             <button
               onClick={() => setOpenSupport(!openSupport)}

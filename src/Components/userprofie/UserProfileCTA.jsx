@@ -12,16 +12,14 @@ const UserProfileCTA = () => {
       aria-labelledby="profile-cta-heading"
       className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600 text-white shadow-2xl"
     >
-      {/* Decorative blur */}
       <div className="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-white/20 blur-3xl" />
       <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
 
       <div className="relative z-10 p-6 sm:p-8 items-center justify-center lg:p-10 flex flex-col gap-6">
-        {/* Heading */}
         <header className="space-y-2">
           <h2
             id="profile-cta-heading"
-            className="text-2xl sm:text-5xl font-bold leading-tight"
+            className="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight"
           >
             Ready for your next adventure?
           </h2>
@@ -31,7 +29,6 @@ const UserProfileCTA = () => {
           </p>
         </header>
 
-        {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={() => navigate("/")}

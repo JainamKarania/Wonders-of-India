@@ -18,7 +18,7 @@ const CONTACT_INFO = [
   {
     icon: LocationOn,
     title: "Our Office",
-    desc: "Mumbai, Maharashtra, India",
+    desc: "Bengaluru, Karnataka, India",
   },
   {
     icon: Call,

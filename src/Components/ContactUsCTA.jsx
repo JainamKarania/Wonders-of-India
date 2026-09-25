@@ -1,16 +1,24 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { Link } from "react-router-dom";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@mui/material";
 import { Call, Email, ChatBubbleOutline, SupportAgent } from "@mui/icons-material";
 
-/**
- * Contact Us CTA – Wonders of India
- * Focus: Support, reassurance, easy connection
- * Tech: React, Tailwind CSS, Material UI, GSAP
- */
-
 gsap.registerPlugin(ScrollTrigger);
+
+const CONTACT_OPTIONS = [
+  {
+    icon: Call,
+    title: "Call Us",
+    desc: "Speak directly with our travel advisors for quick assistance.",
+  },
+  {
+    icon: Email,
+    title: "Email Support",
+    desc: "Share your travel ideas and receive detailed responses.",
+  },
+];
 
 export default function ContactUsCTA() {
   const sectionRef = useRef(null);
@@ -31,7 +39,7 @@ export default function ContactUsCTA() {
         },
       });
 
-      gsap.from(rightRef.current.children, {
+      gsap.from(rightRef.current?.children, {
         opacity: 0,
         y: 40,
         duration: 0.9,
@@ -43,7 +51,7 @@ export default function ContactUsCTA() {
         },
       });
 
-      gsap.from(actionsRef.current.children, {
+      gsap.from(actionsRef.current?.children, {
         opacity: 0,
         scale: 0.9,
         duration: 0.8,
@@ -65,19 +73,20 @@ export default function ContactUsCTA() {
       aria-labelledby="contact-cta-heading"
       className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-violet-700 to-fuchsia-600"
     >
-      {/* Soft glow background */}
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,white,transparent_60%)]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,white,transparent_60%)]"
+      />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:py-28">
-        <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
-          {/* Support Message */}
-          <header ref={leftRef} className="space-y-6">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+          <header ref={leftRef} className="space-y-5 sm:space-y-6">
             <h2
               id="contact-cta-heading"
-              className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
+              className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
             >
-              Let’s Plan Your Journey Together
-              <span className="block text-slate-900">We’re Here to Help</span>
+              Let's Plan Your Journey Together
+              <span className="block text-slate-900">We're Here to Help</span>
             </h2>
 
             <p className="max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
@@ -88,52 +97,46 @@ export default function ContactUsCTA() {
 
             <div
               ref={actionsRef}
-              className="flex flex-wrap items-center gap-4 pt-2"
+              className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2"
             >
-              {/* <Button
+              <Button
+                component="a"
+                href="tel:+919876543210"
                 variant="contained"
                 size="large"
                 startIcon={<SupportAgent />}
-                className="!rounded-2xl !bg-slate-900 !px-7 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
+                className="!rounded-2xl !bg-slate-900 !px-5 sm:!px-7 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !normal-case hover:!bg-black"
               >
                 Talk to an Expert
               </Button>
 
               <Button
+                component={Link}
+                to="/chat"
                 variant="outlined"
                 size="large"
                 startIcon={<ChatBubbleOutline />}
-                className="!rounded-2xl !border-white !px-7 !py-3 !text-base !font-semibold !text-white !normal-case hover:!bg-white/10"
+                className="!rounded-2xl !border-white !px-5 sm:!px-7 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !text-white !normal-case hover:!border-white hover:!bg-white/10"
               >
                 Start Live Chat
-              </Button> */}
+              </Button>
             </div>
           </header>
 
-          {/* Contact Options */}
-          <aside
-            ref={rightRef}
-            className="grid gap-6 sm:grid-cols-2"
-          >
-            {[{
-              icon: <Call fontSize="large" className="text-indigo-600" />,
-              title: "Call Us",
-              desc: "Speak directly with our travel advisors for quick assistance.",
-            },{
-              icon: <Email fontSize="large" className="text-indigo-600" />,
-              title: "Email Support",
-              desc: "Share your travel ideas and receive detailed responses.",
-            }].map((item) => (
+          <aside ref={rightRef} className="grid gap-6 sm:grid-cols-2">
+            {CONTACT_OPTIONS.map(({ icon: Icon, title, desc }) => (
               <article
-                key={item.title}
+                key={title}
                 className="rounded-2xl bg-white/90 p-6 shadow-xl backdrop-blur"
               >
-                <div className="mb-4">{item.icon}</div>
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-orange-100">
+                  <Icon className="text-orange-600" fontSize="medium" />
+                </div>
                 <h3 className="text-lg font-semibold text-slate-900">
-                  {item.title}
+                  {title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                  {item.desc}
+                  {desc}
                 </p>
               </article>
             ))}

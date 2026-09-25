@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   TextField,
@@ -10,13 +12,33 @@ import {
 } from "@mui/material";
 import { Send, LocationOn, Call, Email } from "@mui/icons-material";
 
-/**
- * Contact Component – Wonders of India
- * Focus: Easy communication, clarity, trust
- * Tech: React, Tailwind CSS, Material UI, GSAP
- */
-
 gsap.registerPlugin(ScrollTrigger);
+
+const CONTACT_INFO = [
+  {
+    icon: LocationOn,
+    title: "Our Office",
+    desc: "Mumbai, Maharashtra, India",
+  },
+  {
+    icon: Call,
+    title: "Call Us",
+    desc: "+91 98765 43210",
+  },
+  {
+    icon: Email,
+    title: "Email Us",
+    desc: "support@wondersofindia.com",
+  },
+];
+
+const EMPTY_FORM = {
+  name: "",
+  email: "",
+  phone: "",
+  subject: "",
+  message: "",
+};
 
 export default function Contact() {
   const sectionRef = useRef(null);
@@ -24,17 +46,12 @@ export default function Contact() {
   const formRef = useRef(null);
   const infoRef = useRef(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(headerRef.current.children, {
+      gsap.from(headerRef.current?.children, {
         opacity: 0,
         y: 40,
         duration: 0.8,
@@ -57,7 +74,7 @@ export default function Contact() {
         },
       });
 
-      gsap.from(infoRef.current.children, {
+      gsap.from(infoRef.current?.children, {
         opacity: 0,
         y: 30,
         duration: 0.7,
@@ -77,10 +94,28 @@ export default function Contact() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted:", formData);
-    // Integrate API / Email service here
+    setSubmitting(true);
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/contact`,
+        formData
+      );
+
+      if (!res.data.success) throw new Error(res.data.message);
+
+      toast.success("Message sent! We'll get back to you soon.");
+      setFormData(EMPTY_FORM);
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.message || "Failed to send message. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -89,18 +124,19 @@ export default function Contact() {
       aria-labelledby="contact-heading"
       className="relative overflow-hidden bg-slate-50"
     >
-      {/* Decorative background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,white,transparent_70%)] opacity-60" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_top_left,white,transparent_70%)]"
+      />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24">
-        {/* Header */}
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24">
         <header
           ref={headerRef}
           className="mx-auto max-w-3xl text-center space-y-4"
         >
           <h2
             id="contact-heading"
-            className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+            className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl"
           >
             Get in Touch With Us
           </h2>
@@ -110,17 +146,15 @@ export default function Contact() {
           </p>
         </header>
 
-        {/* Content */}
-        <div className="mt-16 grid gap-12 lg:grid-cols-2">
-          {/* Contact Form */}
+        <div className="mt-12 sm:mt-16 grid gap-10 sm:gap-12 lg:grid-cols-2">
           <Card
             ref={formRef}
             elevation={0}
             className="rounded-2xl border border-slate-200 bg-white shadow-sm"
           >
-            <CardContent className="p-6 sm:p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid gap-6 sm:grid-cols-2">
+            <CardContent className="p-5 sm:p-8">
+              <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+                <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
                   <TextField
                     label="Full Name"
                     name="name"
@@ -140,7 +174,7 @@ export default function Contact() {
                   />
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
                   <TextField
                     label="Phone Number"
                     name="phone"
@@ -180,42 +214,30 @@ export default function Contact() {
                   type="submit"
                   variant="contained"
                   size="large"
+                  disabled={submitting}
                   startIcon={<Send />}
-                  className="!rounded-2xl !bg-slate-900 !px-8 !py-3 !text-base !font-semibold !normal-case hover:!bg-black"
+                  className="!rounded-2xl !bg-slate-900 !px-6 sm:!px-8 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !normal-case hover:!bg-black"
                 >
-                  Send Message
+                  {submitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-          {/* Contact Info */}
-          <aside ref={infoRef} className="space-y-6">
-            {[{
-              icon: <LocationOn className="text-indigo-600" fontSize="large" />,
-              title: "Our Office",
-              desc: "Mumbai, Maharashtra, India",
-            },{
-              icon: <Call className="text-indigo-600" fontSize="large" />,
-              title: "Call Us",
-              desc: "+91 98765 43210",
-            },{
-              icon: <Email className="text-indigo-600" fontSize="large" />,
-              title: "Email Us",
-              desc: "support@wondersofindia.com",
-            }].map((item) => (
+          <aside ref={infoRef} className="space-y-5 sm:space-y-6">
+            {CONTACT_INFO.map(({ icon: Icon, title, desc }) => (
               <article
-                key={item.title}
-                className="flex items-start gap-4 rounded-2xl bg-white p-6 shadow-sm"
+                key={title}
+                className="flex items-start gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-sm"
               >
-                <div>{item.icon}</div>
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-100">
+                  <Icon className="text-orange-600" />
+                </div>
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900">
-                    {item.title}
+                    {title}
                   </h3>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {item.desc}
-                  </p>
+                  <p className="mt-1 text-sm text-slate-600">{desc}</p>
                 </div>
               </article>
             ))}

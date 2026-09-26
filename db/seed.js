@@ -1,9 +1,3 @@
-// Run once: `node db/seed.js`
-// Populates the real Postgres `destinations` table from the existing
-// static data file, so it stops being empty. After this runs
-// successfully, api/destinations/index.js reads from Postgres instead —
-// data/destination.data.js is no longer the live source of truth.
-
 import "dotenv/config";
 import { db } from "./client.js";
 import { destinations } from "./schema.js";
@@ -14,9 +8,6 @@ async function seed() {
 
   const rows = PACKAGE_DATA.map((item) => ({
     title: item.title,
-    // Schema stores locations as text — join if the source data has it
-    // as an array (confirmed earlier that it does), store as-is if it's
-    // already a string.
     locations: Array.isArray(item.locations)
       ? item.locations.join(", ")
       : item.locations,

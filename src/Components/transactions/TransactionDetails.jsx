@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Chip } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Chip, CircularProgress } from "@mui/material";
 import {
   CheckCircle,
-  HourglassEmpty,
-  ErrorOutline,
+  Cancel,
   ReceiptLong,
   LocationOn,
   CalendarToday,
@@ -11,94 +12,95 @@ import {
   TravelExplore,
 } from "@mui/icons-material";
 import gsap from "gsap";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 
-/* -------------------- MOCK TRANSACTIONS -------------------- */
-const TRANSACTIONS = [
-  {
-    transactionId: "WOI-TXN-784512",
-    bookingId: "WOI-BKG-21984",
-    from: "Mumbai",
-    to: "Jaipur",
-    journeyDate: "15 Feb 2025",
-    paymentDate: "10 Jan 2025",
-    amount: 24999,
-    paymentMethod: "UPI",
-    bookingStatus: "Confirmed",
-    paymentStatus: "Completed",
-    email: "jainam.karania@example.com",
-  },
-  {
-    transactionId: "WOI-TXN-784513",
-    bookingId: "WOI-BKG-21985",
-    from: "Delhi",
-    to: "Goa",
-    journeyDate: "02 Feb 2025",
-    paymentDate: null,
-    amount: 18999,
-    paymentMethod: "Card",
-    bookingStatus: "Pending Confirmation",
-    paymentStatus: "Payment In Progress",
-    email: "rohit.sharma@example.com",
-  },
-  {
-    transactionId: "WOI-TXN-784514",
-    bookingId: "WOI-BKG-21986",
-    from: "Ahmedabad",
-    to: "Leh",
-    journeyDate: "22 Mar 2025",
-    paymentDate: null,
-    amount: 32999,
-    paymentMethod: "Net Banking",
-    bookingStatus: "Cancelled",
-    paymentStatus: "Failed",
-    email: "ananya.singh@example.com",
-  },
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "confirmed", label: "Confirmed" },
+  { key: "cancelled", label: "Cancelled" },
 ];
 
 export default function TransactionsDetails() {
-  const [activeTab, setActiveTab] = useState("in-progress");
+  const [activeTab, setActiveTab] = useState("all");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    gsap.fromTo(
-      ".booking-card",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, stagger: 0.15, duration: 0.6, ease: "power3.out" }
-    );
-  }, [activeTab]);
+    if (authLoading) return;
 
-  const filteredTransactions = TRANSACTIONS.filter(
-    (t) =>
-      (activeTab === "completed" && t.paymentStatus === "Completed") ||
-      (activeTab === "in-progress" &&
-        t.paymentStatus === "Payment In Progress") ||
-      (activeTab === "failed" && t.paymentStatus === "Failed")
-  );
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-  const handleInvoiceDownload = (txnId) => {
-    console.log("Downloading invoice for:", txnId);
-  };
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/bookings`,
+          { headers: { Authorization: `Bearer ${session?.access_token}` } }
+        );
+
+        if (!res.data.success) throw new Error(res.data.message);
+        setBookings(res.data.data ?? []);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load your transactions.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [user, authLoading, navigate]);
+
+  // Only fires once real data exists — running unconditionally on mount
+  // would animate zero cards before the fetch resolves.
+  useEffect(() => {
+    if (loading || bookings.length === 0) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".booking-card",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, stagger: 0.15, duration: 0.6, ease: "power3.out" }
+      );
+    });
+
+    return () => ctx.revert();
+  }, [loading, bookings, activeTab]);
+
+  const filteredTransactions = useMemo(() => {
+    if (activeTab === "all") return bookings;
+    return bookings.filter((b) => b.status === activeTab);
+  }, [bookings, activeTab]);
 
   return (
     <section className="p-6 md:p-8 bg-gray-50 rounded-3xl shadow-lg">
-      {/* Header */}
       <header className="mb-6">
         <h2 className="flex items-center gap-2 text-2xl md:text-3xl font-bold text-gray-900">
           <TravelExplore className="text-gray-700" />
-          Transactions & Bookings
+          Transaction History
         </h2>
         <p className="mt-1 text-gray-600 text-sm md:text-base max-w-2xl">
-          All your trip transactions and booking details with{" "}
+          A record of your bookings and their amounts with{" "}
           <span className="font-semibold text-gray-800">Wonders of India</span>.
         </p>
       </header>
 
-      {/* Tabs */}
       <nav className="mb-6 flex flex-wrap gap-3">
-        {[
-          { key: "in-progress", label: "Payment In Progress" },
-          { key: "completed", label: "Completed Transactions" },
-          { key: "failed", label: "Failed Transactions" },
-        ].map((tab) => (
+        {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -113,115 +115,95 @@ export default function TransactionsDetails() {
         ))}
       </nav>
 
-      {/* Booking Cards */}
-      <div className="flex flex-col gap-4">
-        {filteredTransactions.map((txn) => (
-          <article
-            key={txn.transactionId}
-            className="booking-card relative flex flex-col md:flex-row rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-lg transition"
-          >
-            {/* Left accent bar */}
-            <span className="absolute left-0 top-0 h-full w-1 bg-gray-700" />
+      {loading && (
+        <div className="flex justify-center py-12">
+          <CircularProgress sx={{ color: "#374151" }} />
+        </div>
+      )}
 
-            {/* Left Section: IDs & Email */}
-            <div className="flex-1 p-4 md:p-5 flex flex-col justify-between gap-2">
-              <p className="text-xs text-gray-400">Transaction ID</p>
-              <p className="font-semibold text-gray-800 truncate">
-                {txn.transactionId}
-              </p>
+      {!loading && error && <p className="text-red-500">{error}</p>}
 
-              <p className="text-xs text-gray-400 mt-1">Booking ID</p>
-              <p className="font-medium text-gray-700 truncate">{txn.bookingId}</p>
+      {!loading && !error && filteredTransactions.length === 0 && (
+        <p className="text-gray-500">No transactions found for this filter.</p>
+      )}
 
-              <p className="text-xs text-gray-400 mt-1">Email</p>
-              <p className="font-medium text-gray-700 truncate">{txn.email}</p>
-            </div>
+      {!loading && !error && filteredTransactions.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {filteredTransactions.map((txn) => {
+            const locations = Array.isArray(txn.destination?.locations)
+              ? txn.destination.locations.join(", ")
+              : txn.destination?.locations;
+            const ref = `WOI-${String(txn.id).padStart(6, "0")}`;
 
-            {/* Middle Section: Journey & Booking Status */}
-            <div className="flex-1 p-4 md:p-5 flex flex-col justify-center gap-2 border-l border-gray-200 md:border-l-0 md:border-r md:border-gray-200">
-              <p className="text-xs text-gray-400">Journey Details</p>
-              <p className="flex items-center gap-2 text-sm text-gray-700">
-                <LocationOn className="text-gray-700" fontSize="small" />
-                {txn.from} → {txn.to}
-              </p>
+            return (
+              <article
+                key={txn.id}
+                className="booking-card relative flex flex-col md:flex-row rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-lg transition"
+              >
+                <span className="absolute left-0 top-0 h-full w-1 bg-gray-700" />
 
-              <p className="text-xs text-gray-400 mt-1">Journey Date</p>
-              <p className="flex items-center gap-2 text-sm text-gray-700">
-                <CalendarToday className="text-gray-700" fontSize="small" />
-                {txn.journeyDate}
-              </p>
+                <div className="flex-1 p-4 md:p-5 flex flex-col justify-between gap-2">
+                  <p className="text-xs text-gray-400">Booking Reference</p>
+                  <p className="font-semibold text-gray-800 truncate">{ref}</p>
 
-              <p className="text-xs text-gray-400 mt-1">Booking Status</p>
-              <p className="text-sm">
-                <span
-                  className={`font-semibold ${
-                    txn.bookingStatus === "Confirmed"
-                      ? "text-emerald-600"
-                      : txn.bookingStatus === "Cancelled"
-                      ? "text-red-500"
-                      : "text-orange-500"
-                  }`}
-                >
-                  {txn.bookingStatus}
-                </span>
-              </p>
-            </div>
+                  <p className="text-xs text-gray-400 mt-1">Package</p>
+                  <p className="font-medium text-gray-700 truncate">
+                    {txn.destination?.title}
+                  </p>
 
-            {/* Right Section: Redesigned */}
-            <div className="flex-1 p-4 md:p-5 flex flex-col justify-between items-end text-right">
-              {/* Payment Method */}
-              <div className="mb-2">
-                <p className="text-xs text-gray-400">Payment Method</p>
-                <p className="font-semibold text-gray-800 flex items-center gap-1 justify-end">
-                  <Payments fontSize="small" className="text-gray-700" />
-                  {txn.paymentMethod}
-                </p>
-              </div>
+                  <p className="text-xs text-gray-400 mt-1">Booked On</p>
+                  <p className="font-medium text-gray-700 truncate">
+                    {new Date(txn.createdAt).toDateString()}
+                  </p>
+                </div>
 
-              {/* Amount Paid / Pending */}
-              <div className="mb-2">
-                <p className="text-xs text-gray-400">Amount</p>
-                <p className="font-semibold text-gray-800">
-                  ₹{txn.amount.toLocaleString()}
-                </p>
-              </div>
+                <div className="flex-1 p-4 md:p-5 flex flex-col justify-center gap-2 border-l border-gray-200 md:border-l-0 md:border-r md:border-gray-200">
+                  <p className="text-xs text-gray-400">Journey Details</p>
+                  <p className="flex items-center gap-2 text-sm text-gray-700">
+                    <LocationOn className="text-gray-700" fontSize="small" />
+                    {txn.fromCity ? `${txn.fromCity} → ` : ""}
+                    {locations}
+                  </p>
 
-              {/* Payment Status & Invoice */}
-              <div className="flex items-center gap-2 mt-2">
-                <Chip
-                  icon={
-                    txn.paymentStatus === "Completed" ? (
-                      <CheckCircle />
-                    ) : txn.paymentStatus === "Failed" ? (
-                      <ErrorOutline />
-                    ) : (
-                      <HourglassEmpty />
-                    )
-                  }
-                  label={txn.paymentStatus}
-                  color={
-                    txn.paymentStatus === "Completed"
-                      ? "success"
-                      : txn.paymentStatus === "Failed"
-                      ? "error"
-                      : "warning"
-                  }
-                  size="small"
-                />
-                {txn.paymentStatus === "Completed" && (
-                  <button
-                    onClick={() => handleInvoiceDownload(txn.transactionId)}
-                    className="flex items-center gap-1 text-sm font-medium text-emerald-600 hover:underline"
-                  >
-                    <ReceiptLong fontSize="small" />
-                    Invoice
-                  </button>
-                )}
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+                  <p className="text-xs text-gray-400 mt-1">Journey Date</p>
+                  <p className="flex items-center gap-2 text-sm text-gray-700">
+                    <CalendarToday className="text-gray-700" fontSize="small" />
+                    {new Date(txn.travelDate).toDateString()}
+                  </p>
+                </div>
+
+                <div className="flex-1 p-4 md:p-5 flex flex-col justify-between items-end text-right">
+                  <div className="mb-2">
+                    <p className="text-xs text-gray-400">Amount</p>
+                    <p className="font-semibold text-gray-800 flex items-center gap-1 justify-end">
+                      <Payments fontSize="small" className="text-gray-700" />
+                      ₹{txn.totalPrice?.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <Chip
+                      icon={
+                        txn.status === "confirmed" ? <CheckCircle /> : <Cancel />
+                      }
+                      label={txn.status === "confirmed" ? "Confirmed" : "Cancelled"}
+                      color={txn.status === "confirmed" ? "success" : "error"}
+                      size="small"
+                    />
+                    <button
+                      onClick={() => navigate("/booking-history")}
+                      className="flex items-center gap-1 text-sm font-medium text-emerald-600 hover:underline"
+                    >
+                      <ReceiptLong fontSize="small" />
+                      Invoice
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

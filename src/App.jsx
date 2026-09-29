@@ -9,12 +9,13 @@ import Auth from "./Components/auth/Auth";
 import BookingForm from "./booking/BookingForm.jsx";
 import TransactionHistoryPage from "./pages/TransactionHistoryPage.jsx";
 import ProtectedRoute from "./Components/routes/ProtectedRoute.jsx";
-import Itineraries from "./Components/itinearies/Itineraries.jsx";
+// import Itineraries from "./Components/itinearies/Itineraries.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
 import ItinerariesPage from "./pages/ItineariesPage.jsx";
 import BookingHistoryPage from "./pages/BookingHistoryPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import ChatWidget from "./chat/ChatWidget.jsx";
+
 function App() {
   return (
     <>
@@ -24,16 +25,15 @@ function App() {
             <Route
               path="/booking"
               element={
-                // <ProtectedRoute>
+                <ProtectedRoute>
                   <BookingPage />
-                // </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
 
             <Route index element={<HomeScreen />} />
             <Route path="/home" element={<HomeScreen />} />
             <Route path="/aboutpage" element={<AboutPage />} />
-            {/* <Route path ='/booking' element = {<BookingPage/>}/> */}
             <Route path="/booking-form" element={<BookingForm />} />
             <Route path="/destination" element={<DestinationPage />} />
             <Route path="/contact" element={<ContactPage />} />

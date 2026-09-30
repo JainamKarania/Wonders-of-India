@@ -6,8 +6,6 @@ import { Menu, MenuItem, IconButton } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
 import { useAuth } from "./context/AuthContext.jsx";
 
-// Single source of truth for nav links — used by both the desktop bar and
-// the mobile drawer so labels/paths can never drift out of sync.
 const NAV_LINKS = [
   { name: "About", path: "/aboutpage" },
   { name: "Packages & Itineraries", path: "/destination" },

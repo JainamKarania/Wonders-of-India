@@ -1,101 +1,133 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaXTwitter, FaYoutube } from "react-icons/fa6";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaXTwitter,
+  FaYoutube,
+} from "react-icons/fa6";
 import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
 
+// Confirm these paths match the routes declared in your App.jsx.
 const QUICK_LINKS = [
-  { name: "About us", path: "/aboutpage" },
-  { name: "Destinations & Packages", path: "/destination" },
-  { name: "Booking", path: "/booking" },
-  { name: "Contact", path: "/contact" },
+  { label: "About us", to: "/aboutpage" },
+  { label: "Destinations & Packages", to: "/destination" },
+  { label: "Booking", to: "/booking" },
+  { label: "Contact", to: "/contact" },
 ];
 
+// Add your actual profile URLs. Links with an empty href are hidden.
 const SOCIAL_LINKS = [
-  { label: "Facebook", href: "https://facebook.com", icon: FaFacebookF },
-  { label: "Instagram", href: "https://instagram.com", icon: FaInstagram },
-  { label: "X", href: "https://x.com", icon: FaXTwitter },
-  { label: "YouTube", href: "https://youtube.com", icon: FaYoutube },
+  { label: "Facebook", href: "", icon: FaFacebookF },
+  { label: "Instagram", href: "", icon: FaInstagram },
+  { label: "X", href: "", icon: FaXTwitter },
+  { label: "YouTube", href: "", icon: FaYoutube },
 ];
 
-const Footer = () => {
+// Replace these example details with your real business contact information.
+const CONTACT = {
+  email: "hello@wondersofindia.travel",
+  phoneDisplay: "+91 98765 43210",
+  phoneHref: "+919876543210",
+  address: "45 MG Road, Bengaluru, Karnataka, India",
+};
+
+const linkClass =
+  "transition-colors duration-200 hover:text-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950";
+
+export default function Footer() {
+  const visibleSocialLinks = SOCIAL_LINKS.filter(({ href }) => href.trim());
+
   return (
-    <footer className="bg-slate-950 text-white pt-14 sm:pt-16 pb-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:gap-8 md:grid-cols-3">
+    <footer className="bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-14 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-3 lg:gap-12">
           {/* Brand */}
-          <div className="flex flex-col items-center text-center gap-4">
-            <Link to="/" className="text-2xl font-bold">
+          <section className="flex min-w-0 flex-col items-center text-center sm:col-span-2 lg:col-span-1 lg:items-start lg:text-left">
+            <Link
+              to="/"
+              aria-label="Wonders of India home"
+              className="text-2xl font-bold tracking-tight"
+            >
               Wonders <span className="text-orange-400">of India</span>
             </Link>
-            <p className="text-gray-300 max-w-xs">
+
+            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">
               Curated Indian journeys, crafted with care — explore the country
               with us.
             </p>
-            <div className="flex items-center gap-3 mt-1">
-              {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-gray-300 transition-colors hover:border-orange-400 hover:text-orange-400"
-                >
-                  <Icon size={15} />
-                </a>
-              ))}
-            </div>
-          </div>
 
-          {/* Navigation links */}
-          <div className="flex flex-col items-center text-center">
-            <h2 className="text-lg font-bold mb-4 text-white">Quick Links</h2>
-            <nav aria-label="Footer navigation" className="space-y-2">
-              {QUICK_LINKS.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="block text-gray-300 hover:text-orange-400 transition-colors duration-300"
-                >
-                  {item.name}
-                </Link>
-              ))}
+            {visibleSocialLinks.length > 0 && (
+              <nav
+                aria-label="Social media"
+                className="mt-5 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
+              >
+                {visibleSocialLinks.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Visit us on ${label}`}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-slate-300 hover:border-orange-400 hover:text-orange-400 ${linkClass}`}
+                  >
+                    <Icon aria-hidden="true" size={17} />
+                  </a>
+                ))}
+              </nav>
+            )}
+          </section>
+
+          {/* Internal navigation */}
+          <section className="flex flex-col items-center text-center sm:items-start sm:text-left">
+            <h2 className="text-base font-semibold">Quick Links</h2>
+            <nav aria-label="Footer navigation" className="mt-4">
+              <ul className="flex flex-col items-center gap-3 sm:items-start">
+                {QUICK_LINKS.map(({ label, to }) => (
+                  <li key={to}>
+                    <Link to={to} className={`text-sm text-slate-300 ${linkClass}`}>
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </nav>
-          </div>
+          </section>
 
           {/* Contact information */}
-          <div className="flex flex-col items-center text-center">
-            <h2 className="text-lg font-bold mb-4 text-white">Contact Us</h2>
-            <div className="flex flex-col gap-3 text-gray-300">
+          <section className="flex min-w-0 flex-col items-center text-center sm:items-start sm:text-left">
+            <h2 className="text-base font-semibold">Contact Us</h2>
+            <address className="mt-4 flex max-w-full flex-col gap-4 not-italic text-sm text-slate-300">
               <a
-                href="mailto:hello@wondersofindia.travel"
-                className="flex items-center justify-center gap-2 hover:text-orange-400 transition-colors"
+                href={`mailto:${CONTACT.email}`}
+                className={`flex max-w-full items-start justify-center gap-3 break-all sm:justify-start ${linkClass}`}
               >
-                <MdEmail size={18} className="shrink-0" />
-                hello@wondersofindia.travel
+                <MdEmail aria-hidden="true" size={19} className="mt-0.5 shrink-0" />
+                <span>{CONTACT.email}</span>
               </a>
-              <a
-                href="tel:+919876543210"
-                className="flex items-center justify-center gap-2 hover:text-orange-400 transition-colors"
-              >
-                <MdPhone size={18} className="shrink-0" />
-                +91 98765 43210
-              </a>
-              <p className="flex items-start justify-center gap-2 text-center">
-                <MdLocationOn size={18} className="shrink-0 mt-0.5" />
-                <span>45 MG Road, Bengaluru, Karnataka, India</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Copyright section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-12 pt-6 border-t border-white/10 text-center text-sm text-gray-400">
-        <p>&copy; {new Date().getFullYear()} Wonders of India. All rights reserved.</p>
+              <a
+                href={`tel:${CONTACT.phoneHref}`}
+                className={`flex items-start justify-center gap-3 sm:justify-start ${linkClass}`}
+              >
+                <MdPhone aria-hidden="true" size={19} className="mt-0.5 shrink-0" />
+                <span>{CONTACT.phoneDisplay}</span>
+              </a>
+
+              <p className="flex items-start justify-center gap-3 sm:justify-start">
+                <MdLocationOn aria-hidden="true" size={19} className="mt-0.5 shrink-0" />
+                <span>{CONTACT.address}</span>
+              </p>
+            </address>
+          </section>
+        </div>
+
+        <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs leading-5 text-slate-400 sm:mt-12 sm:text-sm">
+          <p>
+            &copy; {new Date().getFullYear()} Wonders of India. All rights
+            reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

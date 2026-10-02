@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa6";
 import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
 
-// Confirm these paths match the routes declared in your App.jsx.
+
 const QUICK_LINKS = [
   { label: "About us", to: "/aboutpage" },
   { label: "Destinations & Packages", to: "/destination" },
@@ -15,7 +15,7 @@ const QUICK_LINKS = [
   { label: "Contact", to: "/contact" },
 ];
 
-// Add your actual profile URLs. Links with an empty href are hidden.
+
 const SOCIAL_LINKS = [
   { label: "Facebook", href: "", icon: FaFacebookF },
   { label: "Instagram", href: "", icon: FaInstagram },
@@ -23,7 +23,7 @@ const SOCIAL_LINKS = [
   { label: "YouTube", href: "", icon: FaYoutube },
 ];
 
-// Replace these example details with your real business contact information.
+
 const CONTACT = {
   email: "hello@wondersofindia.travel",
   phoneDisplay: "+91 98765 43210",
@@ -77,7 +77,7 @@ export default function Footer() {
             )}
           </section>
 
-          {/* Internal navigation */}
+          
           <section className="flex flex-col items-center text-center sm:items-start sm:text-left">
             <h2 className="text-base font-semibold">Quick Links</h2>
             <nav aria-label="Footer navigation" className="mt-4">
@@ -93,7 +93,7 @@ export default function Footer() {
             </nav>
           </section>
 
-          {/* Contact information */}
+         
           <section className="flex min-w-0 flex-col items-center text-center sm:items-start sm:text-left">
             <h2 className="text-base font-semibold">Contact Us</h2>
             <address className="mt-4 flex max-w-full flex-col gap-4 not-italic text-sm text-slate-300">

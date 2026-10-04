@@ -1,8 +1,8 @@
 import React from "react";
 import Navbar from "../Components/Navbar";
-import SideBar from "../Components/userprofie/SideBar";
-import BookingDetails from "../Components/userprofie/BookingDetails";
-import UserProfileCTA from "../Components/userprofie/UserProfileCTA";
+import SideBar from "../Components/userprofile/SideBar";
+import BookingDetails from "../Components/userprofile/BookingDetails";
+import UserProfileCTA from "../Components/userprofile/UserProfileCTA";
 import Footer from "../Components/Footer";
 const UserProfilePage = () => {
   return (

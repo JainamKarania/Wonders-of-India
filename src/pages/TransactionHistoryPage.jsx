@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from "../Components/Navbar";
-import SideBar from "../Components/userprofie/SideBar";
+import SideBar from "../Components/userprofile/SideBar";
 import TransactionsDetails from '../Components/transactions/TransactionDetails';
 
 const TransactionHistoryPage = () => {

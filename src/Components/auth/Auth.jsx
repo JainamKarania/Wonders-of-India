@@ -11,14 +11,16 @@ import {
   VisibilityOff,
   FlightTakeoff,
 } from "@mui/icons-material";
+import { FcGoogle } from "react-icons/fc";
 
 const Auth = () => {
-  const { signup, login } = useAuth();
+  const { signup, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [isSignup, setIsSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -64,6 +66,20 @@ const Auth = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setErrors({});
+
+    const result = await loginWithGoogle();
+
+    // Only reached if the redirect itself failed to start — on success
+    // the browser has already navigated to Google by this point.
+    if (!result.success) {
+      setErrors({ api: result.error });
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -214,7 +230,19 @@ const Auth = () => {
 
         <Divider className="!my-6">OR</Divider>
 
-        <p className="text-center text-gray-600">
+        <Button
+          fullWidth
+          size="large"
+          variant="outlined"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading || submitting}
+          startIcon={!googleLoading && <FcGoogle size={20} />}
+          className="!border-gray-300 !text-gray-700 !py-3 !rounded-xl !normal-case hover:!bg-gray-50"
+        >
+          {googleLoading ? "Redirecting..." : "Continue with Google"}
+        </Button>
+
+        <p className="text-center text-gray-600 mt-6">
           {isSignup ? "Already have an account?" : "New to Wonders of India?"}
           <button
             type="button"

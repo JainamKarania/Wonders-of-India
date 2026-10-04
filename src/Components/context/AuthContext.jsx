@@ -63,6 +63,21 @@ export const AuthProvider = ({ children }) => {
     return { success: true };
   };
 
+  const loginWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+
+    // On success, the browser navigates away to Google immediately — this
+    // only returns if something went wrong before the redirect even started.
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
   };
@@ -75,6 +90,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         signup,
         login,
+        loginWithGoogle,
         logout,
       }}
     >

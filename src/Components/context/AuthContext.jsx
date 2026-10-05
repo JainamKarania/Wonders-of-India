@@ -12,10 +12,17 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (window.location.hash) {
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search
+        );
+      }
     });
 
-    // Keep state in sync with login/logout/token refresh, including
-    // across other browser tabs.
+    
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
@@ -36,16 +43,10 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
 
-    // Profile creation is now handled by a database trigger
-    // (on_auth_user_created) that fires whenever Supabase Auth creates a
-    // new user — this works regardless of whether email confirmation is
-    // required, unlike an insert made from here with the client SDK.
+    
 
     return {
       success: true,
-      // If email confirmation is required, Supabase returns a user but
-      // no session yet — the caller needs to know this to avoid treating
-      // signup as an immediate login.
       needsEmailConfirmation: !data.session,
     };
   };
@@ -69,8 +70,7 @@ export const AuthProvider = ({ children }) => {
       options: { redirectTo: `${window.location.origin}/` },
     });
 
-    // On success, the browser navigates away to Google immediately — this
-    // only returns if something went wrong before the redirect even started.
+    
     if (error) {
       return { success: false, error: error.message };
     }

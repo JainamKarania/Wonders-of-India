@@ -2,12 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MdCancel } from "react-icons/md";
-import { FiMoreVertical, FiEye } from "react-icons/fi";
+import { FiMoreVertical, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { CalendarToday, Route } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
+import EditBookingModal from "./EditBookingModal";
 
 const TABS = [
   { key: "all", label: "All Bookings" },
@@ -23,6 +24,8 @@ const BookingDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [editingBookingId, setEditingBookingId] = useState(null);
 
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -111,6 +114,45 @@ const BookingDetails = () => {
     } finally {
       setCancellingId(null);
     }
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    const confirmed = window.confirm(
+      "Permanently delete this booking? This cannot be undone — it will be removed completely, not just cancelled."
+    );
+    if (!confirmed) return;
+
+    setDeletingId(bookingId);
+    setOpenMenuId(null);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const res = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/bookings/${bookingId}`,
+        { headers: { Authorization: `Bearer ${session?.access_token}` } }
+      );
+
+      if (!res.data.success) throw new Error(res.data.message);
+
+      toast.success("Booking deleted.");
+      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete this booking.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleBookingUpdated = (updated) => {
+    setBookings((prev) =>
+      prev.map((b) =>
+        b.id === updated.id ? { ...b, ...updated, destination: b.destination } : b
+      )
+    );
   };
 
   const handleViewDetails = () => {
@@ -233,7 +275,19 @@ const BookingDetails = () => {
                       </button>
 
                       {openMenuId === b.id && (
-                        <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border text-sm z-10">
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border text-sm z-10">
+                          {b.status === "confirmed" && (
+                            <button
+                              onClick={() => {
+                                setEditingBookingId(b.id);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <FiEdit2 className="text-slate-600" /> Edit Booking
+                            </button>
+                          )}
+
                           {b.status === "confirmed" && (
                             <button
                               onClick={() => handleCancelTrip(b.id)}
@@ -249,6 +303,15 @@ const BookingDetails = () => {
                           >
                             <FiEye className="text-blue-600" /> View Full Details
                           </button>
+
+                          <button
+                            onClick={() => handleDeleteBooking(b.id)}
+                            disabled={deletingId === b.id}
+                            className="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-red-700 border-t"
+                          >
+                            <FiTrash2 />
+                            {deletingId === b.id ? "Deleting..." : "Delete Permanently"}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -259,6 +322,13 @@ const BookingDetails = () => {
           )}
         </div>
       )}
+
+      <EditBookingModal
+        open={editingBookingId !== null}
+        bookingId={editingBookingId}
+        onClose={() => setEditingBookingId(null)}
+        onUpdated={handleBookingUpdated}
+      />
     </section>
   );
 };

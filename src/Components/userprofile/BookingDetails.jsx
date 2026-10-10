@@ -274,7 +274,7 @@ const BookingDetails = () => {
                       </button>
 
                       {openMenuId === b.id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border text-sm z-10">
+                        <div className="absolute right-0 w-48 bg-white rounded-lg shadow-lg border text-sm z-10">
                           {b.status === "confirmed" && (
                             <button
                               onClick={() => {

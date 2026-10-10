@@ -262,7 +262,7 @@ const BookingDetails = () => {
                     <div className="relative mt-4">
                       <button
                         onClick={() => toggleMenu(b.id)}
-                        className="p-2 rounded-full text-black hover:bg-gray-100 transition"
+                        className="absolute top-2 right-2 rounded-full text-black hover:bg-gray-100 transition"
                         aria-label="More options"
                         disabled={cancellingId === b.id}
                       >

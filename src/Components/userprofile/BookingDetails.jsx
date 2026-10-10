@@ -248,18 +248,7 @@ const BookingDetails = () => {
                     </p>
                   </div>
 
-                  <div className="flex-1 p-5 flex flex-col justify-between items-end text-right">
-                    <span
-                      className={`inline-block px-3 py-1 text-sm font-semibold rounded-full capitalize ${
-                        b.status === "confirmed"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {b.status}
-                    </span>
-
-                    <div className="relative mt-4">
+                  <div className="relative mt-4">
                       <button
                         onClick={() => toggleMenu(b.id)}
                         className="absolute top-2 right-2 rounded-full text-black hover:bg-gray-100 transition"
@@ -273,13 +262,6 @@ const BookingDetails = () => {
                         )}
                       </button>
 
-                      <EditBookingModal
-        open={editingBookingId !== null}
-        bookingId={editingBookingId}
-        onClose={() => setEditingBookingId(null)}
-        onUpdated={handleBookingUpdated}
-      />
-
                       {openMenuId === b.id && (
                         <div className="absolute right-0 w-48 bg-white rounded-lg shadow-lg border text-sm z-10">
                           {b.status === "confirmed" && (
@@ -288,7 +270,7 @@ const BookingDetails = () => {
                                 setEditingBookingId(b.id);
                                 setOpenMenuId(null);
                               }}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2"
                             >
                               <FiEdit2 className="text-slate-600" /> Edit Booking
                             </button>
@@ -297,7 +279,7 @@ const BookingDetails = () => {
                           {b.status === "confirmed" && (
                             <button
                               onClick={() => handleCancelTrip(b.id)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2"
                             >
                               <MdCancel className="text-red-600" /> Cancel Trip
                             </button>
@@ -305,7 +287,7 @@ const BookingDetails = () => {
 
                           <button
                             onClick={handleViewDetails}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                            className="w-full text-left px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2"
                           >
                             <FiEye className="text-blue-600" /> View Full Details
                           </button>
@@ -321,6 +303,18 @@ const BookingDetails = () => {
                         </div>
                       )}
                     </div>
+
+                  <div className="flex-1 p-5 flex flex-col justify-between items-end text-right">
+                    <span
+                      className={`inline-block px-3 py-1 text-sm font-semibold rounded-full capitalize ${
+                        b.status === "confirmed"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {b.status}
+                    </span>
+
                   </div>
                 </article>
               );
@@ -328,6 +322,13 @@ const BookingDetails = () => {
           )}
         </div>
       )}
+
+      <EditBookingModal
+        open={editingBookingId !== null}
+        bookingId={editingBookingId}
+        onClose={() => setEditingBookingId(null)}
+        onUpdated={handleBookingUpdated}
+      />
     </section>
   );
 };

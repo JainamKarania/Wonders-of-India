@@ -273,6 +273,13 @@ const BookingDetails = () => {
                         )}
                       </button>
 
+                      <EditBookingModal
+        open={editingBookingId !== null}
+        bookingId={editingBookingId}
+        onClose={() => setEditingBookingId(null)}
+        onUpdated={handleBookingUpdated}
+      />
+
                       {openMenuId === b.id && (
                         <div className="absolute right-0 w-48 bg-white rounded-lg shadow-lg border text-sm z-10">
                           {b.status === "confirmed" && (
@@ -321,13 +328,6 @@ const BookingDetails = () => {
           )}
         </div>
       )}
-
-      <EditBookingModal
-        open={editingBookingId !== null}
-        bookingId={editingBookingId}
-        onClose={() => setEditingBookingId(null)}
-        onUpdated={handleBookingUpdated}
-      />
     </section>
   );
 };

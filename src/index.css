@@ -2,3 +2,150 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-50 font-sans text-ink-800 antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight text-ink-900;
+  }
+
+  img {
+    @apply max-w-full;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-ink-900;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-page px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-14 sm:py-20 lg:py-24;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-600;
+  }
+
+  .section-title {
+    @apply text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl;
+  }
+
+  .section-subtitle {
+    @apply mt-4 max-w-2xl text-base leading-relaxed text-ink-600 sm:text-lg;
+  }
+
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-glow hover:bg-brand-700 active:scale-[0.98];
+  }
+
+  .btn-dark {
+    @apply btn bg-ink-900 text-white hover:bg-ink-800 active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply btn border border-ink-200 bg-white text-ink-800 hover:border-ink-300 hover:bg-ink-50;
+  }
+
+  .btn-ghost {
+    @apply btn text-ink-700 hover:bg-ink-100;
+  }
+
+  .btn-danger {
+    @apply btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+  }
+
+  .card {
+    @apply rounded-2xl border border-ink-100 bg-white shadow-soft;
+  }
+
+  .card-hover {
+    @apply card transition duration-300 hover:-translate-y-1 hover:shadow-lift;
+  }
+
+  .input {
+    @apply min-h-[44px] w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-base text-ink-900 placeholder:text-ink-400 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-50 text-emerald-700;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-50 text-red-700;
+  }
+
+  .badge-brand {
+    @apply badge bg-brand-50 text-brand-700;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-ink-100;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.flatpickr-calendar {
+  font-family: "Inter", sans-serif;
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(26, 25, 23, 0.14);
+}

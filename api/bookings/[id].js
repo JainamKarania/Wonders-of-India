@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { bookings, travelers, destinations } from "../../db/schema.js";
-import { getUserFromRequest } from "../lib/supabaseadmin.js";
+import { getUserFromRequest } from "../lib/supabaseAdmin.js";
 
 export default async function handler(req, res) {
   const user = await getUserFromRequest(req);
@@ -75,73 +75,61 @@ async function handleGet(req, res, existing) {
 }
 
 async function handlePut(req, res, existing) {
-  const { travelDate, fromCity, travelers: travelerList } = req.body ?? {};
+  const { fromCity, destinationId } = req.body ?? {};
 
-  if (!travelDate || !Array.isArray(travelerList) || travelerList.length === 0) {
+  if (existing.status !== "confirmed") {
     return res.status(400).json({
       success: false,
-      message: "travelDate and at least one traveler are required.",
+      message: "Only confirmed bookings can be changed.",
     });
   }
 
-  for (const t of travelerList) {
-    if (!t.name) {
-      return res.status(400).json({
-        success: false,
-        message: "Every traveler needs a name.",
-      });
-    }
+  const nextFromCity = typeof fromCity === "string" ? fromCity.trim() : "";
+  const nextDestinationId = Number(destinationId);
+
+  if (!nextFromCity || !nextDestinationId) {
+    return res.status(400).json({
+      success: false,
+      message: "A boarding station and a destination are required.",
+    });
   }
 
   try {
     const [destination] = await db
       .select()
       .from(destinations)
-      .where(eq(destinations.id, existing.destinationId));
+      .where(eq(destinations.id, nextDestinationId));
 
     if (!destination) {
       return res.status(404).json({
         success: false,
-        message: "The destination for this booking no longer exists.",
+        message: "That destination doesn't exist.",
       });
     }
 
-    // Recalculated here too — editing the traveler list changes what the
-    // correct total should be, so it can never be trusted from the client.
+    const [{ count }] = await db
+      .select({ count: sql`count(*)::int` })
+      .from(travelers)
+      .where(eq(travelers.bookingId, existing.id));
+
+    // Price is recalculated from the (possibly new) destination and the
+    // existing traveler count, never trusted from the client.
     const perPerson = destination.discountedPrice ?? destination.price ?? 0;
-    const totalPrice = perPerson * travelerList.length;
+    const totalPrice = perPerson * Math.max(count, 1);
 
     const [updated] = await db
       .update(bookings)
       .set({
-        travelDate: new Date(travelDate),
-        fromCity: fromCity ?? null,
+        fromCity: nextFromCity,
+        destinationId: destination.id,
         totalPrice,
       })
       .where(eq(bookings.id, existing.id))
       .returning();
 
-    // Replace-all for travelers rather than diffing individual
-    // add/edit/remove operations — simpler, and mirrors how creation
-    // already inserts the whole list at once.
-    await db.delete(travelers).where(eq(travelers.bookingId, existing.id));
-
-    const insertedTravelers = await db
-      .insert(travelers)
-      .values(
-        travelerList.map((t) => ({
-          bookingId: existing.id,
-          name: t.name,
-          age: t.age ? Number(t.age) : null,
-          gender: t.gender ?? null,
-          mobile: t.mobile ?? null,
-        }))
-      )
-      .returning();
-
     return res.status(200).json({
       success: true,
-      data: { ...updated, travelers: insertedTravelers },
+      data: { ...updated, destination },
     });
   } catch (err) {
     console.error(err);

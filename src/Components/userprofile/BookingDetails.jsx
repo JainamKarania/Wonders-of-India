@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MdCancel } from "react-icons/md";
-import { FiMoreVertical, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { CalendarToday, Route } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
-import EditBookingModal from "./EditBookingModal";
+import ChangeTripModal from "./ChangeTripModal";
 
 const TABS = [
   { key: "all", label: "All Bookings" },
@@ -19,13 +19,12 @@ const TABS = [
 
 const BookingDetails = () => {
   const [activeTab, setActiveTab] = useState("all");
-  const [openMenuId, setOpenMenuId] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-  const [editingBookingId, setEditingBookingId] = useState(null);
+  const [changingBooking, setChangingBooking] = useState(null);
 
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -63,6 +62,7 @@ const BookingDetails = () => {
     }
 
     fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading]);
 
   const sortedBookings = useMemo(() => {
@@ -82,13 +82,10 @@ const BookingDetails = () => {
     });
   }, [sortedBookings, activeTab]);
 
-  const toggleMenu = (id) => setOpenMenuId((prev) => (prev === id ? null : id));
-
   const handleCancelTrip = async (bookingId) => {
     if (!window.confirm("Are you sure you want to cancel this trip?")) return;
 
     setCancellingId(bookingId);
-    setOpenMenuId(null);
 
     try {
       const {
@@ -122,7 +119,6 @@ const BookingDetails = () => {
     if (!confirmed) return;
 
     setDeletingId(bookingId);
-    setOpenMenuId(null);
 
     try {
       const {
@@ -149,14 +145,12 @@ const BookingDetails = () => {
   const handleBookingUpdated = (updated) => {
     setBookings((prev) =>
       prev.map((b) =>
-        b.id === updated.id ? { ...b, ...updated, destination: b.destination } : b
+        b.id === updated.id ? { ...b, ...updated } : b
       )
     );
   };
 
-  const handleViewDetails = () => {
-    navigate("/booking-history");
-  };
+  const isBusy = (id) => cancellingId === id || deletingId === id;
 
   return (
     <section
@@ -248,62 +242,6 @@ const BookingDetails = () => {
                     </p>
                   </div>
 
-                  <div className="relative mt-4">
-                      <button
-                        onClick={() => toggleMenu(b.id)}
-                        className="absolute top-2 right-2 rounded-full text-black hover:bg-gray-100 transition"
-                        aria-label="More options"
-                        disabled={cancellingId === b.id}
-                      >
-                        {cancellingId === b.id ? (
-                          <CircularProgress size={18} sx={{ color: "#6b7280" }} />
-                        ) : (
-                          <FiMoreVertical size={18} />
-                        )}
-                      </button>
-
-                      {openMenuId === b.id && (
-                        <div className="absolute right-0 w-48 bg-white rounded-lg shadow-lg border text-sm z-10">
-                          {b.status === "confirmed" && (
-                            <button
-                              onClick={() => {
-                                setEditingBookingId(b.id);
-                                setOpenMenuId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <FiEdit2 className="text-slate-600" /> Edit Booking
-                            </button>
-                          )}
-
-                          {b.status === "confirmed" && (
-                            <button
-                              onClick={() => handleCancelTrip(b.id)}
-                              className="w-full text-left px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <MdCancel className="text-red-600" /> Cancel Trip
-                            </button>
-                          )}
-
-                          <button
-                            onClick={handleViewDetails}
-                            className="w-full text-left px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <FiEye className="text-blue-600" /> View Full Details
-                          </button>
-
-                          <button
-                            onClick={() => handleDeleteBooking(b.id)}
-                            disabled={deletingId === b.id}
-                            className="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-red-700 border-t"
-                          >
-                            <FiTrash2 />
-                            {deletingId === b.id ? "Deleting..." : "Delete Permanently"}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
                   <div className="flex-1 p-5 flex flex-col justify-between items-end text-right">
                     <span
                       className={`inline-block px-3 py-1 text-sm font-semibold rounded-full capitalize ${
@@ -315,6 +253,45 @@ const BookingDetails = () => {
                       {b.status}
                     </span>
 
+                    <div className="mt-4 flex flex-wrap justify-end gap-2">
+                      {b.status === "confirmed" && (
+                        <button
+                          onClick={() => setChangingBooking(b)}
+                          disabled={isBusy(b.id)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <FiEdit2 size={14} /> Change Trip
+                        </button>
+                      )}
+
+                      {b.status === "confirmed" && (
+                        <button
+                          onClick={() => handleCancelTrip(b.id)}
+                          disabled={isBusy(b.id)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {cancellingId === b.id ? (
+                            <CircularProgress size={14} sx={{ color: "#92400e" }} />
+                          ) : (
+                            <MdCancel size={16} />
+                          )}
+                          {cancellingId === b.id ? "Cancelling..." : "Cancel"}
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleDeleteBooking(b.id)}
+                        disabled={isBusy(b.id)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {deletingId === b.id ? (
+                          <CircularProgress size={14} sx={{ color: "#b91c1c" }} />
+                        ) : (
+                          <FiTrash2 size={14} />
+                        )}
+                        {deletingId === b.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
                   </div>
                 </article>
               );
@@ -323,10 +300,10 @@ const BookingDetails = () => {
         </div>
       )}
 
-      <EditBookingModal
-        open={editingBookingId !== null}
-        bookingId={editingBookingId}
-        onClose={() => setEditingBookingId(null)}
+      <ChangeTripModal
+        open={changingBooking !== null}
+        booking={changingBooking}
+        onClose={() => setChangingBooking(null)}
         onUpdated={handleBookingUpdated}
       />
     </section>

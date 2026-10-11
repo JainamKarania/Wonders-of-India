@@ -1,54 +1,149 @@
+import { lazy, Suspense, useEffect } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import HomeScreen from "./Components/HomeScreen";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AboutPage from "./pages/AboutPage";
-import BookingPage from "./pages/BookingPage";
-import ContactPage from "./pages/ContactPage";
-import DestinationPage from "./pages/DestinationPage";
-import Auth from "./Components/auth/Auth";
-import BookingForm from "./booking/BookingForm.jsx";
-import TransactionHistoryPage from "./pages/TransactionHistoryPage.jsx";
 import ProtectedRoute from "./Components/routes/ProtectedRoute.jsx";
-// import Itineraries from "./Components/itinearies/Itineraries.jsx";
-import UserProfilePage from "./pages/UserProfilePage.jsx";
-import ItinerariesPage from "./pages/ItineariesPage.jsx";
-import BookingHistoryPage from "./pages/BookingHistoryPage.jsx";
-import ChatPage from "./pages/ChatPage.jsx";
 import ChatWidget from "./chat/ChatWidget.jsx";
 
-function App() {
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const BookingPage = lazy(() => import("./pages/BookingPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const DestinationPage = lazy(() => import("./pages/DestinationPage"));
+const ItinerariesPage = lazy(() => import("./pages/ItineariesPage.jsx"));
+const BookingHistoryPage = lazy(() => import("./pages/BookingHistoryPage.jsx"));
+const TransactionHistoryPage = lazy(() =>
+  import("./pages/TransactionHistoryPage.jsx")
+);
+const UserProfilePage = lazy(() => import("./pages/UserProfilePage.jsx"));
+const ChatPage = lazy(() => import("./pages/ChatPage.jsx"));
+const Auth = lazy(() => import("./Components/auth/Auth"));
+const BookingForm = lazy(() => import("./booking/BookingForm.jsx"));
+
+const HIDE_WIDGET_ON = ["/chat", "/auth"];
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+
+  return null;
+}
+
+function PageLoader() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-screen items-center justify-center bg-ink-50"
+    >
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
+      <span className="sr-only">Loading page</span>
+    </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
+      <p className="eyebrow">Error 404</p>
+      <h1 className="mt-3 text-4xl font-extrabold sm:text-5xl">
+        This route isn't on our map
+      </h1>
+      <p className="section-subtitle mx-auto">
+        The page you're looking for has moved or never existed.
+      </p>
+      <Link to="/" className="btn-primary mt-8">
+        Back to home
+      </Link>
+    </main>
+  );
+}
+
+function AppRoutes() {
+  const { pathname } = useLocation();
+  const showWidget = !HIDE_WIDGET_ON.includes(pathname);
+
   return (
     <>
-      <div>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/booking"
-              element={
-                <ProtectedRoute>
-                  <BookingPage />
-                </ProtectedRoute>
-              }
-            />
+      <ScrollToTop />
 
-            <Route index element={<HomeScreen />} />
-            <Route path="/home" element={<HomeScreen />} />
-            <Route path="/aboutpage" element={<AboutPage />} />
-            <Route path="/booking-form" element={<BookingForm />} />
-            <Route path="/destination" element={<DestinationPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/auth" element={<Auth />}></Route>
-            <Route path="/itineary" element={<ItinerariesPage />} />
-            <Route path="/booking-history" element={<BookingHistoryPage />} />
-            <Route path="/transaction-history" element={<TransactionHistoryPage />} />
-            <Route path="/profile" element={<UserProfilePage />} />
-            <Route path="/chat" element={<ChatPage />} />
-          </Routes>
-          <ChatWidget />
-        </BrowserRouter>
-      </div>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route index element={<HomeScreen />} />
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/aboutpage" element={<AboutPage />} />
+          <Route path="/destination" element={<DestinationPage />} />
+          <Route path="/itineary" element={<ItinerariesPage />} />
+          <Route
+            path="/itinerary"
+            element={<Navigate to="/itineary" replace />}
+          />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/chat" element={<ChatPage />} />
+
+          <Route
+            path="/booking"
+            element={
+              <ProtectedRoute>
+                <BookingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking-form"
+            element={
+              <ProtectedRoute>
+                <BookingForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking-history"
+            element={
+              <ProtectedRoute>
+                <BookingHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transaction-history"
+            element={
+              <ProtectedRoute>
+                <TransactionHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+
+      {showWidget && <ChatWidget />}
     </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+}

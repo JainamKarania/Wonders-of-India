@@ -2,7 +2,7 @@ import { desc, eq, sql, cosineDistance } from "drizzle-orm";
 import { GoogleGenAI } from "@google/genai";
 import { db } from "../../db/client.js";
 import { destinations, bookings } from "../../db/schema.js";
-import { getUserFromRequest } from "../lib/supabaseadmin.js";
+import { getUserFromRequest } from "../lib/supabaseAdmin.js";
 
 const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;

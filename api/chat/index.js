@@ -10,14 +10,6 @@ const EMBED_MODEL = "voyage-4-lite";
 const EMBED_DIMENSIONS = 1024;
 const CHAT_MODEL = "gemini-3.8-flash";
 const TOP_K_DESTINATIONS = 5;
-const MAX_HISTORY_TURNS = 10;
-
-// Keep this below `maxDuration` in vercel.json so we always return a clean
-// error ourselves instead of being killed by the platform mid-request.
-const TIME_BUDGET_MS = 25000;
-const EMBED_TIMEOUT_MS = 4000;
-const MIN_TIME_FOR_RETRY_MS = 6000;
-const MAX_RETRIES = 2;
 
 const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
@@ -38,44 +30,29 @@ export default async function handler(req, res) {
     });
   }
 
-  const startedAt = Date.now();
-  const remaining = () => TIME_BUDGET_MS - (Date.now() - startedAt);
-
   try {
-    // Auth lookup and retrieval don't depend on each other, so run them
-    // together instead of one after the other.
-    const userPromise = getUserFromRequest(req).catch(() => null);
-    const destinationsPromise = findRelevantDestinations(message);
+    const queryEmbedding = await embedQuery(message);
+    const relevantDestinations = await getRelevantDestinations(queryEmbedding);
 
-    const user = await userPromise;
-    const bookingsPromise = user
-      ? getUserBookings(user.id).catch(() => [])
-      : Promise.resolve([]);
-
-    const [relevantDestinations, userBookings] = await Promise.all([
-      destinationsPromise,
-      bookingsPromise,
-    ]);
+    // No auth required — chat works for anonymous visitors too. If a
+    // valid session is present, pull their recent bookings in as extra
+    // context so the model can answer "what did I book" style questions
+    // without needing a separate tool-call round trip.
+    const user = await getUserFromRequest(req);
+    const userBookings = user ? await getUserBookings(user.id) : [];
 
     const systemPrompt = buildSystemPrompt(relevantDestinations, userBookings, user);
 
-    const recentHistory = Array.isArray(history)
-      ? history.slice(-MAX_HISTORY_TURNS)
-      : [];
-
     const contents = [
-      ...recentHistory,
+      ...(Array.isArray(history) ? history : []),
       { role: "user", parts: [{ text: message }] },
     ];
 
-    const response = await generateWithRetry(
-      {
-        model: CHAT_MODEL,
-        contents,
-        config: { systemInstruction: systemPrompt },
-      },
-      remaining
-    );
+    const response = await generateWithRetry({
+      model: CHAT_MODEL,
+      contents,
+      config: { systemInstruction: systemPrompt },
+    });
 
     return res.status(200).json({
       success: true,
@@ -83,35 +60,16 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error(err);
-
-    const timedOut = err?.name === "AbortError" || err?.name === "TimeoutError";
-
-    return res.status(timedOut ? 504 : 500).json({
+    return res.status(500).json({
       success: false,
-      message: timedOut
-        ? "The assistant took too long to respond. Please try again."
-        : "Failed to get a response. Please try again.",
+      message: "Failed to get a response. Please try again.",
     });
   }
 }
 
-async function generateWithRetry(params, remaining, attempt = 0) {
-  const timeLeft = remaining();
-
-  if (timeLeft <= 1000) {
-    const err = new Error("Time budget exhausted");
-    err.name = "TimeoutError";
-    throw err;
-  }
-
+async function generateWithRetry(params, attempt = 1) {
   try {
-    return await genAI.models.generateContent({
-      ...params,
-      config: {
-        ...params.config,
-        abortSignal: AbortSignal.timeout(timeLeft - 500),
-      },
-    });
+    return await genAI.models.generateContent(params);
   } catch (err) {
     const isOverloaded =
       err?.status === "UNAVAILABLE" ||
@@ -119,11 +77,11 @@ async function generateWithRetry(params, remaining, attempt = 0) {
       err?.error?.code === 503 ||
       /UNAVAILABLE|high demand/i.test(err?.message ?? "");
 
-    if (isOverloaded && attempt < MAX_RETRIES && remaining() > MIN_TIME_FOR_RETRY_MS) {
-      const waitMs = 1000 * (attempt + 1);
-      console.log(`Gemini overloaded — retrying in ${waitMs}ms (retry ${attempt + 1})`);
+    if (isOverloaded && attempt <= 3) {
+      const waitMs = 1500 * attempt;
+      console.log(`Gemini overloaded — retrying in ${waitMs}ms (attempt ${attempt})`);
       await new Promise((resolve) => setTimeout(resolve, waitMs));
-      return generateWithRetry(params, remaining, attempt + 1);
+      return generateWithRetry(params, attempt + 1);
     }
 
     throw err;
@@ -146,7 +104,6 @@ async function embedQuery(text) {
       input_type: "query",
       output_dimension: EMBED_DIMENSIONS,
     }),
-    signal: AbortSignal.timeout(EMBED_TIMEOUT_MS),
   });
 
   if (!res.ok) {
@@ -155,34 +112,6 @@ async function embedQuery(text) {
 
   const data = await res.json();
   return data.data[0].embedding;
-}
-
-// Never throws: if embedding or the vector search fails (rate limit,
-// slow response), fall back to a plain list of destinations so the chat
-// still answers instead of timing out.
-async function findRelevantDestinations(message) {
-  try {
-    const queryEmbedding = await embedQuery(message);
-    return await getRelevantDestinations(queryEmbedding);
-  } catch (err) {
-    console.error("Retrieval failed, using fallback list:", err?.message ?? err);
-
-    try {
-      return await db
-        .select({
-          title: destinations.title,
-          locations: destinations.locations,
-          price: destinations.price,
-          discountedPrice: destinations.discountedPrice,
-          tag: destinations.tag,
-        })
-        .from(destinations)
-        .limit(8);
-    } catch (fallbackErr) {
-      console.error("Fallback destinations query failed:", fallbackErr);
-      return [];
-    }
-  }
 }
 
 async function getRelevantDestinations(queryEmbedding) {

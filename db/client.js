@@ -10,12 +10,14 @@ if (!connectionString) {
 
 const globalForDb = globalThis;
 
-// `prepare: false` is required when using Supabase's pooled (pgbouncer)
-// connection in transaction mode — pgbouncer doesn't support prepared
-// statements being reused across pooled connections.
 const client =
   globalForDb.__postgresClient ??
-  postgres(connectionString, { prepare: false });
+  postgres(connectionString, {
+    prepare: false,
+    max: 1,
+    connect_timeout: 5,
+    idle_timeout: 20,
+  });
 
 if (process.env.NODE_ENV !== "production") {
   globalForDb.__postgresClient = client;

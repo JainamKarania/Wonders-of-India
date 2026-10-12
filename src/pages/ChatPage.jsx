@@ -1,31 +1,33 @@
-import React from "react";
+import { Sparkles } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import ChatWindow from "../chat/ChatWindow";
 
-const ChatPage = () => {
+export default function ChatPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-ink-50">
       <Navbar />
 
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 pt-28 pb-16">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-800">
-            Chat with Your Travel Assistant
+      <main className="container-page max-w-3xl pb-14 pt-24 sm:pt-32">
+        <header className="mb-8 text-center">
+          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-glow">
+            <Sparkles size={24} aria-hidden="true" />
+          </span>
+          <h1 className="text-3xl font-extrabold sm:text-4xl">
+            Your AI travel assistant
           </h1>
-          <p className="mt-2 text-slate-600">
-            Ask about destinations, packages, or your own bookings.
+          <p className="section-subtitle mx-auto">
+            Ask about destinations and packages, get trip ideas, or check on
+            your own bookings.
           </p>
-        </div>
+        </header>
 
-        <div className="h-[70vh] rounded-3xl border border-orange-100 shadow-xl overflow-hidden">
-          <ChatWindow />
+        <div className="card h-[70vh] min-h-[28rem] overflow-hidden shadow-lift">
+          <ChatWindow autoFocus />
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
   );
-};
-
-export default ChatPage;
+}

@@ -20,7 +20,7 @@ const HomeScreen = () => (
       <CTA />
     </main>
 
-    <Footer />
+    <Footer showCta={false} />
   </div>
 );
 

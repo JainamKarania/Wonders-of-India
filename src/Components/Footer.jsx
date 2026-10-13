@@ -52,12 +52,13 @@ function LinkColumn({ title, links }) {
   );
 }
 
-export default function Footer() {
+export default function Footer({ showCta = true }) {
   const socials = SOCIAL_LINKS.filter(({ href }) => href.trim());
 
   return (
     <footer className="bg-ink-900 text-white">
-      <div className="container-page pt-12 sm:pt-16">
+      <div className={`container-page ${showCta ? "pt-12 sm:pt-16" : ""}`}>
+        {showCta && (
         <div className="flex flex-col gap-6 rounded-3xl bg-gradient-to-br from-brand-600 to-brand-500 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
             <h2 className="font-display text-xl font-extrabold text-white sm:text-2xl">
@@ -81,6 +82,7 @@ export default function Footer() {
             </Link>
           </div>
         </div>
+        )}
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:py-14 lg:grid-cols-12 lg:gap-8">
           <section className="col-span-2 lg:col-span-4">

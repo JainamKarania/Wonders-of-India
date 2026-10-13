@@ -1,179 +1,142 @@
-import React, { useEffect, useRef } from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Rating,
-  Avatar,
-} from "@mui/material";
-import TravelExploreIcon from "@mui/icons-material/TravelExplore";
-import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
-import gsap from "gsap";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { Quote, Star } from "lucide-react";
 
-const reviews = [
-  
-  {
-    name: "Amit Sharma",
-    review: "Perfect Rajasthan tour with excellent planning.",
-    rating: 5,
-    position: "top-[-112px] left-1/2 -translate-x-1/2",
-  },
+function Stars({ value }) {
+  return (
+    <div
+      role="img"
+      aria-label={`${value} out of 5 stars`}
+      className="flex gap-0.5"
+    >
+      {[1, 2, 3, 4, 5].map((i) => {
+        const fill = Math.max(0, Math.min(1, value - (i - 1)));
 
-  
-  {
-    name: "Neha Verma",
-    review: "Kerala trip was peaceful and well organized.",
-    rating: 4.5,
-    position: "top-1/2 right-[-112px] -translate-y-1/2",
-  },
+        return (
+          <span key={i} className="relative inline-block h-4 w-4">
+            <Star
+              size={16}
+              aria-hidden="true"
+              className="absolute inset-0 fill-ink-200 text-ink-200"
+            />
+            <span
+              className="absolute inset-0 overflow-hidden"
+              style={{ width: `${fill * 100}%` }}
+            >
+              <Star
+                size={16}
+                aria-hidden="true"
+                className="fill-amber-400 text-amber-400"
+              />
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
-  
-  {
-    name: "Rahul Mehta",
-    review: "Amazing experience and great customer support.",
-    rating: 5,
-    position: "bottom-[-112px] left-1/2 -translate-x-1/2",
-  },
+function ReviewCard({ review }) {
+  return (
+    <figure className="card flex h-full w-[85%] shrink-0 snap-center flex-col p-6 sm:w-auto sm:shrink">
+      <Quote
+        size={28}
+        aria-hidden="true"
+        className="fill-brand-100 text-brand-300"
+      />
 
-  
-  {
-    name: "Priya Singh",
-    review: "Loved the Kashmir trip. Highly recommended!",
-    rating: 4.5,
-    position: "top-1/2 left-[-112px] -translate-y-1/2",
-  },
-];
+      <blockquote className="mt-4 flex-1 text-base leading-relaxed text-ink-700">
+        {review.review}
+      </blockquote>
 
-const ReviewsCircular = () => {
-  const circleRef = useRef(null);
-  const cardsRef = useRef([]);
+      <figcaption className="mt-6 flex items-center gap-3 border-t border-ink-100 pt-5">
+        <span
+          aria-hidden="true"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-600 font-bold text-white"
+        >
+          {review.name?.charAt(0)}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-ink-900">
+            {review.name}
+          </p>
+          <Stars value={Number(review.rating) || 0} />
+        </div>
+      </figcaption>
+    </figure>
+  );
+}
+
+export default function Reviews() {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
-    gsap.to(circleRef.current, {
-      rotate: 360,
-      duration: 40,
-      repeat: -1,
-      ease: "linear",
-      transformOrigin: "50% 50%",
-    });
+    let cancelled = false;
 
-    
-    gsap.to(cardsRef.current, {
-      rotate: -360,
-      duration: 40,
-      repeat: -1,
-      ease: "linear",
-      transformOrigin: "50% 50%",
-    });
+    const load = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/reviews`
+        );
+        if (!cancelled) setReviews(res.data.data ?? []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  const average = useMemo(() => {
+    if (!reviews.length) return 0;
+    const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0);
+    return total / reviews.length;
+  }, [reviews]);
+
+  if (!loading && reviews.length === 0) return null;
+
   return (
-    <section className="w-full pt-20 pb-48 bg-gradient-to-b from-orange-50 to-white">
-      
-      <div className="text-center mb-44 px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
-          Journey of Happy Travelers
-        </h2>
-        <p className="text-gray-600 mt-2">
-          The lifecycle of trust at{" "}
-          <span className="text-orange-500 font-semibold">
-            Wonders of India
-          </span>
-        </p>
-      </div>
+    <section aria-labelledby="reviews-heading" className="section bg-white">
+      <div className="container-page">
+        <header className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow">Testimonials</p>
+          <h2 id="reviews-heading" className="section-title mt-3">
+            Loved by happy travelers
+          </h2>
 
-      
-      <div className="hidden lg:flex justify-center items-center">
-        <div
-          ref={circleRef}
-          className="relative w-[600px] h-[600px] rounded-full border-2 border-orange-200"
-        >
-          
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Card className="w-56 h-56 rounded-full flex items-center justify-center shadow-xl bg-white">
-              <CardContent className="text-center">
-                <TravelExploreIcon
-                  className="text-orange-500 mb-2"
-                  fontSize="large"
-                />
-                <Typography className="font-bold text-gray-800">
-                  Wonders of India
-                </Typography>
-                <Typography className="text-xs text-gray-500 mt-1">
-                  Trusted Travel Partner
-                </Typography>
-              </CardContent>
-            </Card>
-          </div>
-
-          
-          {reviews.map((item, index) => (
-            <div
-              key={index}
-              ref={(el) => (cardsRef.current[index] = el)}
-              className={`absolute ${item.position} w-56`}
-            >
-              <Card className="rounded-xl shadow-lg hover:shadow-xl transition">
-                <CardContent className="p-4">
-                  <FormatQuoteIcon className="text-orange-400 text-xl mb-1" />
-                  <Typography className="text-xs text-gray-700 mb-2">
-                    {item.review}
-                  </Typography>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="bg-orange-500 text-xs">
-                      {item.name.charAt(0)}
-                    </Avatar>
-                    <div>
-                      <Typography className="text-xs font-semibold">
-                        {item.name}
-                      </Typography>
-                      <Rating
-                        value={item.rating}
-                        precision={0.5}
-                        readOnly
-                        size="small"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {!loading && (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <Stars value={average} />
+              <p className="text-sm text-ink-600">
+                <span className="font-semibold text-ink-900">
+                  {average.toFixed(1)}
+                </span>{" "}
+                from {reviews.length} review{reviews.length === 1 ? "" : "s"}
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
+          )}
+        </header>
 
-      
-      <div className="lg:hidden px-4 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {reviews.map((item, index) => (
-          <Card key={index} className="rounded-xl shadow-md">
-            <CardContent>
-              <FormatQuoteIcon className="text-orange-400 mb-2" />
-              <Typography className="text-sm text-gray-700 mb-3">
-                {item.review}
-              </Typography>
-              <div className="flex items-center gap-3">
-                <Avatar className="bg-orange-500">
-                  {item.name.charAt(0)}
-                </Avatar>
-                <div>
-                  <Typography className="font-semibold text-sm">
-                    {item.name}
-                  </Typography>
-                  <Rating
-                    value={item.rating}
-                    precision={0.5}
-                    readOnly
-                    size="small"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {loading ? (
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="skeleton h-56" />
+            ))}
+          </div>
+        ) : (
+          <div className="scrollbar-hide -mx-4 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+            {reviews.map((review, i) => (
+              <ReviewCard key={review.id ?? `${review.name}-${i}`} review={review} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
-};
-
-export default ReviewsCircular;
+}

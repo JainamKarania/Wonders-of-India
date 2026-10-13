@@ -1,188 +1,125 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Box, Container, Typography, Grid, Paper, Skeleton } from "@mui/material";
-import { FaPlane, FaHotel, FaUmbrellaBeach, FaHeadset } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { Plane, Hotel, Palmtree, Headset } from "lucide-react";
 
 const ICON_MAP = {
-  flight: FaPlane,
-  hotel: FaHotel,
-  package: FaUmbrellaBeach,
-  support: FaHeadset,
+  flight: Plane,
+  hotel: Hotel,
+  package: Palmtree,
+  support: Headset,
 };
 
-function Services() {
-  const sectionRef = useRef(null);
-  const cardsRef = useRef([]);
+function SkeletonCard() {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-56 animate-pulse rounded-2xl border border-white/10 bg-white/5"
+    />
+  );
+}
+
+export default function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    let cancelled = false;
+
+    const load = async () => {
       try {
         setLoading(true);
         setError(null);
+
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/services`
         );
-        setServices(res.data.data ?? []);
+
+        if (!cancelled) setServices(res.data.data ?? []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load services.");
+        if (!cancelled) setError("We couldn't load our services right now.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchServices();
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  useEffect(() => {
-    if (loading || error || services.length === 0) return undefined;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        cardsRef.current,
-        { opacity: 0, y: 60 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: cardsRef.current[0],
-            start: "top 80%",
-          },
-        }
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [loading, error, services]);
-
   return (
-    <Box
-      component="section"
-      ref={sectionRef}
-      sx={{ py: { xs: 8, sm: 10, md: 12 }, bgcolor: "#020617" }}
+    <section
+      aria-labelledby="services-heading"
+      className="section relative overflow-hidden bg-ink-900"
     >
-      <Container maxWidth="lg">
-        <Box textAlign="center" mb={{ xs: 5, sm: 7 }}>
-          <Typography
-            variant="h4"
-            fontWeight={800}
-            color="white"
-            gutterBottom
-            sx={{ fontSize: { xs: "1.75rem", sm: "2.25rem", md: "2.5rem" } }}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-brand-600/20 blur-3xl"
+      />
+
+      <div className="container-page relative">
+        <header className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow !text-brand-400">What we do</p>
+          <h2
+            id="services-heading"
+            className="section-title mt-3 !text-white"
           >
-            Our Travel Services
-          </Typography>
-          <Typography
-            sx={{
-              color: "rgba(255,255,255,0.7)",
-              maxWidth: 600,
-              mx: "auto",
-              fontSize: { xs: "0.95rem", sm: "1rem" },
-            }}
-          >
-            We offer complete travel solutions to make your journey smooth,
-            comfortable, and memorable.
-          </Typography>
-        </Box>
+            Everything for a smooth journey
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-ink-300 sm:text-lg">
+            Complete travel solutions to make every trip comfortable, simple and
+            memorable.
+          </p>
+        </header>
 
-        {loading && (
-          <Grid container spacing={{ xs: 3, sm: 4 }}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Grid item xs={12} sm={6} md={3} key={i}>
-                <Skeleton
-                  variant="rounded"
-                  height={220}
-                  sx={{ bgcolor: "rgba(255,255,255,0.06)", borderRadius: 4 }}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        )}
+        <div className="mt-12 sm:mt-14">
+          {loading && (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
 
-        {!loading && error && (
-          <Typography textAlign="center" sx={{ color: "rgba(255,255,255,0.6)" }}>
-            {error}
-          </Typography>
-        )}
+          {!loading && error && (
+            <p role="alert" className="text-center text-sm text-ink-300">
+              {error}
+            </p>
+          )}
 
-        {!loading && !error && services.length > 0 && (
-          <Grid container spacing={{ xs: 3, sm: 4 }}>
-            {services.map(({ title, desc, icon }, index) => {
-              const Icon = ICON_MAP[icon] ?? FaPlane;
-              return (
-                <Grid item xs={12} sm={6} md={3} key={title}>
-                  <Paper
-                    ref={(el) => (cardsRef.current[index] = el)}
-                    elevation={0}
-                    sx={{
-                      p: { xs: 3, sm: 4 },
-                      height: "100%",
-                      textAlign: "center",
-                      borderRadius: 4,
-                      bgcolor: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      transition:
-                        "transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease",
-                      "&:hover": {
-                        transform: "translateY(-10px)",
-                        borderColor: "rgba(251,146,60,0.5)",
-                        boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
-                      },
-                    }}
+          {!loading && !error && services.length > 0 && (
+            <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {services.map(({ id, title, desc, icon }) => {
+                const Icon = ICON_MAP[icon] ?? Plane;
+
+                return (
+                  <li
+                    key={id ?? title}
+                    className="group rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:bg-white/[0.07] sm:p-7"
                   >
-                    <Box
+                    <span
                       aria-hidden="true"
-                      sx={{
-                        width: { xs: 64, sm: 72 },
-                        height: { xs: 64, sm: 72 },
-                        borderRadius: "50%",
-                        mx: "auto",
-                        mb: 2.5,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background:
-                          "linear-gradient(135deg, #fb923c 0%, #facc15 100%)",
-                      }}
+                      className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-glow transition-transform duration-300 group-hover:scale-105"
                     >
-                      <Icon size={30} color="#020617" />
-                    </Box>
+                      <Icon size={26} />
+                    </span>
 
-                    <Typography
-                      variant="h6"
-                      fontWeight={700}
-                      color="white"
-                      gutterBottom
-                      sx={{ fontSize: { xs: "1.05rem", sm: "1.15rem" } }}
-                    >
+                    <h3 className="mt-5 text-lg font-bold !text-white">
                       {title}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.65)" }}
-                    >
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-300">
                       {desc}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              );
-            })}
-          </Grid>
-        )}
-      </Container>
-    </Box>
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
-
-export default Services;

@@ -1,193 +1,102 @@
-import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Button, Skeleton } from "@mui/material";
-import { FlightTakeoff, Explore } from "@mui/icons-material";
-
-gsap.registerPlugin(ScrollTrigger);
+import axios from "axios";
+import { Compass, Plane } from "lucide-react";
 
 export default function CTA() {
-  const sectionRef = useRef(null);
-  const headingRef = useRef(null);
-  const textRef = useRef(null);
-  const buttonsRef = useRef(null);
-  const statsRef = useRef(null);
-
   const [stats, setStats] = useState([]);
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    let cancelled = false;
+
+    const load = async () => {
       try {
-        setStatsLoading(true);
-        setStatsError(null);
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/stats`
         );
-        setStats(res.data.data ?? []);
+        if (!cancelled) setStats(res.data.data ?? []);
       } catch (err) {
         console.error(err);
-        setStatsError("Failed to load stats.");
       } finally {
-        setStatsLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchStats();
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(headingRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
-
-      gsap.from(textRef.current, {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        delay: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
-
-      gsap.from(buttonsRef.current.children, {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
-
-      if (!statsLoading && !statsError && stats.length > 0) {
-        gsap.from(statsRef.current?.children, {
-          y: 30,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        });
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [statsLoading, statsError, stats]);
-
   return (
-    <section
-      ref={sectionRef}
-      aria-labelledby="cta-heading"
-      className="relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-500 to-yellow-400"
-    >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,white,transparent_60%)]"
-      />
+    <section aria-labelledby="cta-heading" className="section bg-ink-50">
+      <div className="container-page">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-amber-400 px-6 py-12 shadow-lift sm:px-12 sm:py-16 lg:px-16">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/15 blur-2xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-brand-800/30 blur-3xl"
+          />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-12">
-          <header className="space-y-5 sm:space-y-6">
-            <h2
-              ref={headingRef}
-              id="cta-heading"
-              className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
-            >
-              Discover the Magic of India
-              <span className="block text-gray-900">with Wonders of India</span>
-            </h2>
-
-            <p
-              ref={textRef}
-              className="max-w-xl text-sm leading-relaxed text-white/90 sm:text-base lg:text-lg"
-            >
-              From the Himalayas to the backwaters of Kerala, explore curated travel
-              experiences crafted for culture lovers, adventurers, and soul seekers.
-              Your unforgettable journey begins here.
-            </p>
-
-            <div
-              ref={buttonsRef}
-              className="flex flex-wrap items-center gap-3 sm:gap-4"
-            >
-              <Button
-                component={Link}
-                to="/destination"
-                variant="contained"
-                size="large"
-                startIcon={<Explore />}
-                className="!rounded-2xl !bg-gray-900 !px-5 sm:!px-6 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !normal-case hover:!bg-black"
+          <div className="relative grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
+            <div>
+              <h2
+                id="cta-heading"
+                className="text-3xl font-extrabold leading-tight text-white text-balance sm:text-4xl lg:text-5xl"
               >
-                Explore Packages
-              </Button>
+                Discover the magic of India
+              </h2>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
+                From the Himalayas to the backwaters of Kerala, explore curated
+                journeys for culture lovers, adventurers and soul seekers. Your
+                unforgettable trip starts here.
+              </p>
 
-              <Button
-                component={Link}
-                to="/booking"
-                variant="outlined"
-                size="large"
-                startIcon={<FlightTakeoff />}
-                className="!rounded-2xl !border-white !px-5 sm:!px-6 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !text-white !normal-case hover:!border-white hover:!bg-white/10"
-              >
-                Plan My Trip
-              </Button>
-            </div>
-          </header>
-
-          {statsLoading && (
-            <aside className="grid grid-cols-3 gap-3 sm:gap-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton
-                  key={i}
-                  variant="rounded"
-                  height={96}
-                  sx={{ borderRadius: "16px", bgcolor: "rgba(255,255,255,0.4)" }}
-                />
-              ))}
-            </aside>
-          )}
-
-          {!statsLoading && statsError && (
-            <p className="text-center text-white/80 text-sm">{statsError}</p>
-          )}
-
-          {!statsLoading && !statsError && stats.length > 0 && (
-            <aside ref={statsRef} className="grid grid-cols-3 gap-3 sm:gap-6">
-              {stats.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-2xl bg-white/90 p-3 sm:p-6 text-center shadow-lg backdrop-blur transition-transform duration-300 hover:-translate-y-1"
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link to="/destination" className="btn-dark">
+                  <Compass size={18} aria-hidden="true" />
+                  Explore packages
+                </Link>
+                <Link
+                  to="/booking"
+                  className="btn border border-white/60 text-white hover:bg-white/10"
                 >
-                  <p className="text-lg font-bold text-gray-900 sm:text-2xl lg:text-3xl">
-                    {item.value}
-                  </p>
-                  <p className="mt-1 text-xs sm:text-sm font-medium text-gray-600">
-                    {item.label}
-                  </p>
-                </div>
-              ))}
-            </aside>
-          )}
+                  <Plane size={18} aria-hidden="true" />
+                  Plan my trip
+                </Link>
+              </div>
+            </div>
+
+            {loading && (
+              <div aria-hidden="true" className="grid grid-cols-3 gap-3 sm:gap-5">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-28 animate-pulse rounded-2xl bg-white/30" />
+                ))}
+              </div>
+            )}
+
+            {!loading && stats.length > 0 && (
+              <dl className="grid grid-cols-3 gap-3 sm:gap-5">
+                {stats.map(({ label, value }) => (
+                  <div
+                    key={label}
+                    className="rounded-2xl bg-white/95 p-4 text-center shadow-soft sm:p-6"
+                  >
+                    <dd className="font-display text-2xl font-extrabold text-ink-900 sm:text-3xl">
+                      {value}
+                    </dd>
+                    <dt className="mt-1 text-xs font-medium text-ink-600 sm:text-sm">
+                      {label}
+                    </dt>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
         </div>
       </div>
     </section>

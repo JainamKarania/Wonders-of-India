@@ -12,9 +12,6 @@ const WELCOME_MESSAGE = {
   isWelcome: true,
 };
 
-// The greeting and error bubbles are UI-only, so they are left out of the
-// history the model sees. This also keeps the history starting with a user
-// turn, which Gemini expects.
 const toGeminiHistory = (messages) =>
   messages
     .filter((m) => !m.isWelcome && !m.isError)

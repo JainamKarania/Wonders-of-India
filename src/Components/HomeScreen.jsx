@@ -1,27 +1,27 @@
-import Hero from "./Hero"
-import Navbar from "./Navbar"
-// import AboutMe from "./AboutMe"
-// import Booking from "./Booking"
-import Reviews from "./Reviews"
-import Destination from "./Destination"
-import ContactUs from "./ContactUs"
-import Footer from "./Footer"
-import PartnerSponsers from "./PartnersSponsers"
-import Services from "./Services"
-import CTA from "./CTA"
-// import { HomeHero } from "./HomeHero"
-const HomeScreen = () => {
-  return (
-        <div>
-        <Navbar />
-        <Hero />
-        <Destination />
-        <Services />
-        <Reviews />
-        <PartnerSponsers />
-        <CTA/>
-        <Footer/>
-        </div>
-  )
-}
-export default HomeScreen
+import Navbar from "./Navbar";
+import Hero from "./Hero";
+import Destination from "./Destination";
+import Services from "./Services";
+import Reviews from "./Reviews";
+import PartnerSponsers from "./PartnersSponsers";
+import CTA from "./CTA";
+import Footer from "./Footer";
+
+const HomeScreen = () => (
+  <div className="min-h-screen bg-ink-50">
+    <Navbar />
+
+    <main>
+      <Hero />
+      <Destination />
+      <Services />
+      <Reviews />
+      <PartnerSponsers />
+      <CTA />
+    </main>
+
+    <Footer />
+  </div>
+);
+
+export default HomeScreen;

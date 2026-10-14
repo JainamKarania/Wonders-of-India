@@ -1,17 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import gsap from "gsap";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import {
   Search,
-  CalendarToday,
+  SlidersHorizontal,
+  X,
+  CalendarDays,
   Route,
-  ArrowForward,
-  Tune,
-  ExpandMore,
-  Close,
-} from "@mui/icons-material";
-import { Skeleton } from "@mui/material";
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  MapPin,
+} from "lucide-react";
 import ItineraryModal from "../ItineraryModal";
 
 const PRICE_RANGES = [
@@ -21,26 +22,351 @@ const PRICE_RANGES = [
   { label: "Above ₹30,000", min: 30000, max: Infinity },
 ];
 
+const TABS = [
+  { key: "all", label: "All packages" },
+  { key: "best", label: "Best deals" },
+  { key: "recommended", label: "Recommended" },
+];
+
+const SORT_OPTIONS = [
+  { key: "featured", label: "Featured" },
+  { key: "price-asc", label: "Price: low to high" },
+  { key: "price-desc", label: "Price: high to low" },
+];
+
 const ITEMS_PER_PAGE = 6;
 
-const Itineraries = () => {
+const toList = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v).trim()).filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value.split(",").map((v) => v.trim()).filter(Boolean);
+  }
+  return [];
+};
+
+const formatPrice = (value) => `₹${Number(value).toLocaleString("en-IN")}`;
+
+const normalize = (item) => {
+  const locations = toList(item.locations);
+  const tag = item.tag ?? "";
+
+  return {
+    id: item.id,
+    title: item.title,
+    duration: item.duration || null,
+    locations,
+    route: locations.join(" → "),
+    price: item.price,
+    discountedPrice: item.discountedPrice,
+    effectivePrice: item.discountedPrice ?? item.price ?? 0,
+    image: item.image,
+    tag,
+    type:
+      tag === "Best Seller"
+        ? "best"
+        : tag === "Recommended"
+        ? "recommended"
+        : "all",
+    combo: tag.toLowerCase().includes("combo"),
+  };
+};
+
+function FilterPanel({
+  idPrefix,
+  search,
+  setSearch,
+  locations,
+  selectedLocation,
+  setSelectedLocation,
+  priceRange,
+  setPriceRange,
+  comboOnly,
+  setComboOnly,
+  activeCount,
+  onClear,
+}) {
+  return (
+    <div className="space-y-7">
+      <div className="flex items-center justify-between">
+        <h3 className="flex items-center gap-2 text-base font-bold text-ink-900">
+          <SlidersHorizontal size={18} aria-hidden="true" />
+          Filters
+        </h3>
+        {activeCount > 0 && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor={`${idPrefix}-search`} className="label">
+          Search
+        </label>
+        <div className="relative">
+          <Search
+            size={18}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400"
+          />
+          <input
+            id={`${idPrefix}-search`}
+            className="input pl-10"
+            placeholder="Jaipur, Varanasi..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {locations.length > 0 && (
+        <div>
+          <label htmlFor={`${idPrefix}-location`} className="label">
+            Location
+          </label>
+          <select
+            id={`${idPrefix}-location`}
+            className="input"
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+          >
+            <option value="">All locations</option>
+            {locations.map((loc) => (
+              <option key={loc} value={loc}>
+                {loc}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <fieldset>
+        <legend className="label">Price range</legend>
+        <div className="space-y-1">
+          <label className="flex min-h-[40px] cursor-pointer items-center gap-3 text-sm text-ink-700">
+            <input
+              type="radio"
+              name={`${idPrefix}-price`}
+              checked={priceRange === null}
+              onChange={() => setPriceRange(null)}
+              className="h-4 w-4 accent-brand-600"
+            />
+            Any price
+          </label>
+          {PRICE_RANGES.map((range) => (
+            <label
+              key={range.label}
+              className="flex min-h-[40px] cursor-pointer items-center gap-3 text-sm text-ink-700"
+            >
+              <input
+                type="radio"
+                name={`${idPrefix}-price`}
+                checked={priceRange?.label === range.label}
+                onChange={() => setPriceRange(range)}
+                className="h-4 w-4 accent-brand-600"
+              />
+              {range.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <label className="flex min-h-[40px] cursor-pointer items-center gap-3 text-sm font-medium text-ink-800">
+        <input
+          type="checkbox"
+          checked={comboOnly}
+          onChange={() => setComboOnly(!comboOnly)}
+          className="h-4 w-4 rounded accent-brand-600"
+        />
+        Combo packages only
+      </label>
+    </div>
+  );
+}
+
+function TripCard({ trip, details, isExpanded, onToggle, onReview }) {
+  const hasDiscount =
+    trip.discountedPrice && trip.price && trip.discountedPrice < trip.price;
+
+  return (
+    <article className="card overflow-hidden lg:grid lg:grid-cols-[2fr_3fr]">
+      <div className="relative h-56 bg-gradient-to-br from-brand-100 to-brand-200 sm:h-64 lg:h-auto lg:min-h-[280px]">
+        {trip.image ? (
+          <img
+            src={trip.image}
+            alt={trip.title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-brand-500">
+            <MapPin size={40} aria-hidden="true" />
+          </div>
+        )}
+        {trip.tag && (
+          <span className="badge absolute left-4 top-4 bg-white/95 text-ink-900 shadow-soft">
+            {trip.tag}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col p-5 sm:p-6">
+        <h3 className="text-xl font-bold text-ink-900 sm:text-2xl">
+          {trip.title}
+        </h3>
+
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-600">
+          <span className="flex items-center gap-2">
+            <CalendarDays size={16} aria-hidden="true" className="text-brand-600" />
+            {trip.duration ?? "Duration coming soon"}
+          </span>
+          {trip.route && (
+            <span className="flex items-center gap-2">
+              <Route size={16} aria-hidden="true" className="shrink-0 text-brand-600" />
+              {trip.route}
+            </span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isExpanded}
+          aria-controls={`days-${trip.id}`}
+          className="mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+        >
+          Day-wise itinerary
+          <ChevronDown
+            size={16}
+            aria-hidden="true"
+            className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        <div id={`days-${trip.id}`}>
+          {isExpanded && (
+            <div className="mt-3">
+              {details?.loading && (
+                <div className="space-y-3" aria-hidden="true">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="skeleton h-10" />
+                  ))}
+                </div>
+              )}
+
+              {details?.error && (
+                <p className="text-sm text-red-600">{details.error}</p>
+              )}
+
+              {details && !details.loading && !details.error && (
+                <>
+                  {details.days.length === 0 ? (
+                    <p className="text-sm text-ink-500">
+                      Day-wise details for this package are coming soon.
+                    </p>
+                  ) : (
+                    <ol className="relative ml-2 space-y-5 border-l-2 border-brand-100 pl-6">
+                      {details.days.map((day) => (
+                        <li key={day.dayNumber} className="relative">
+                          <span
+                            aria-hidden="true"
+                            className="absolute -left-[33px] top-1 h-4 w-4 rounded-full bg-brand-600 ring-4 ring-white"
+                          />
+                          <p className="text-sm font-semibold text-ink-900">
+                            Day {day.dayNumber}: {day.title}
+                          </p>
+                          <p className="mt-1 text-sm leading-relaxed text-ink-600">
+                            {day.description}
+                          </p>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-auto flex flex-col gap-4 border-t border-ink-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            {hasDiscount && (
+              <p className="text-sm text-ink-400 line-through">
+                {formatPrice(trip.price)}
+              </p>
+            )}
+            {trip.effectivePrice > 0 && (
+              <p className="text-2xl font-extrabold text-ink-900">
+                {formatPrice(trip.effectivePrice)}
+                <span className="ml-1 text-xs font-medium text-ink-500">
+                  / person
+                </span>
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button type="button" onClick={onReview} className="btn-outline">
+              Review itinerary
+            </button>
+            <Link to={`/booking?destinationId=${trip.id}`} className="btn-primary">
+              Book package
+              <ArrowRight size={18} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="card overflow-hidden lg:grid lg:grid-cols-[2fr_3fr]" aria-hidden="true">
+      <div className="skeleton h-56 !rounded-none lg:h-72" />
+      <div className="space-y-4 p-6">
+        <div className="skeleton h-7 w-2/3" />
+        <div className="skeleton h-4 w-1/2" />
+        <div className="skeleton h-4 w-1/3" />
+        <div className="skeleton mt-8 h-12 w-full" />
+      </div>
+    </div>
+  );
+}
+
+export default function Itineraries() {
+  const [searchParams] = useSearchParams();
+
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const sectionRef = useRef(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
   const [activeTab, setActiveTab] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [priceRange, setPriceRange] = useState(null);
   const [comboOnly, setComboOnly] = useState(false);
+  const [sort, setSort] = useState("featured");
   const [page, setPage] = useState(1);
-  const [expandedId, setExpandedId] = useState(null);
+
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
   const [itineraryDetails, setItineraryDetails] = useState({});
   const [modalDestinationId, setModalDestinationId] = useState(null);
 
+  const listTopRef = useRef(null);
+
   useEffect(() => {
-    const fetchItineraries = async () => {
+    let cancelled = false;
+
+    const load = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -49,88 +375,85 @@ const Itineraries = () => {
           `${import.meta.env.VITE_API_URL}/api/destinations`
         );
 
-        const mapped = (res.data.data ?? []).map((item) => ({
-          id: item.id,
-          title: item.title,
-          duration: item.duration || "Duration details coming soon",
-          route: item.locations,
-          locations: item.locations
-            ?.split(",")
-            .map((loc) => loc.trim())
-            .filter(Boolean),
-          price: item.price,
-          discountedPrice: item.discountedPrice,
-          image: item.image,
-          tag: item.tag,
-          type:
-            item.tag === "Best Seller"
-              ? "best"
-              : item.tag === "Recommended"
-              ? "recommended"
-              : "all",
-          combo: item.tag?.toLowerCase().includes("combo"),
-        }));
-
-        setItineraries(mapped);
+        if (!cancelled) setItineraries((res.data.data ?? []).map(normalize));
       } catch (err) {
         console.error(err);
-        setError("Failed to load itineraries");
+        if (!cancelled) setError("We couldn't load the packages. Please try again.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchItineraries();
-  }, []);
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
-  useEffect(() => {
-    if (loading || itineraries.length === 0) return undefined;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        sectionRef.current?.querySelectorAll(".itinerary"),
-        { opacity: 0, y: 60 },
-        { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 }
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [loading, itineraries, page, activeTab]);
-
-  // Any filter change should return the user to page 1 — otherwise a
-  // narrower filter applied while sitting on page 2+ can silently show
-  // an empty page with no indication that page 1 actually has matches.
   useEffect(() => {
     setPage(1);
-  }, [activeTab, comboOnly, selectedLocation, search, priceRange]);
+  }, [activeTab, comboOnly, selectedLocation, search, priceRange, sort]);
+
+  useEffect(() => {
+    if (!showFilters) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setShowFilters(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showFilters]);
 
   const allLocations = useMemo(() => {
     const set = new Set();
-    itineraries.forEach((it) => it.locations?.forEach((loc) => set.add(loc)));
+    itineraries.forEach((it) => it.locations.forEach((loc) => set.add(loc)));
     return [...set].sort();
   }, [itineraries]);
 
   const filteredData = useMemo(() => {
-    return itineraries.filter((pkg) => {
+    const q = search.trim().toLowerCase();
+
+    const result = itineraries.filter((pkg) => {
       if (activeTab !== "all" && pkg.type !== activeTab) return false;
       if (comboOnly && !pkg.combo) return false;
-      if (selectedLocation && !pkg.locations?.includes(selectedLocation))
-        return false;
-      if (search && !pkg.title?.toLowerCase()?.includes(search?.toLowerCase()))
-        return false;
+      if (selectedLocation && !pkg.locations.includes(selectedLocation)) return false;
+
+      if (q) {
+        const inTitle = pkg.title?.toLowerCase().includes(q);
+        const inLocations = pkg.locations.some((loc) => loc.toLowerCase().includes(q));
+        if (!inTitle && !inLocations) return false;
+      }
+
       if (
         priceRange &&
-        (pkg.discountedPrice < priceRange.min || pkg.discountedPrice >= priceRange.max)
-      )
+        (pkg.effectivePrice < priceRange.min || pkg.effectivePrice >= priceRange.max)
+      ) {
         return false;
+      }
+
       return true;
     });
-  }, [itineraries, activeTab, comboOnly, selectedLocation, search, priceRange]);
+
+    if (sort === "price-asc") {
+      result.sort((a, b) => a.effectivePrice - b.effectivePrice);
+    } else if (sort === "price-desc") {
+      result.sort((a, b) => b.effectivePrice - a.effectivePrice);
+    }
+
+    return result;
+  }, [itineraries, activeTab, comboOnly, selectedLocation, search, priceRange, sort]);
 
   const activeFilterCount = [
     comboOnly,
     Boolean(selectedLocation),
-    Boolean(search),
+    Boolean(search.trim()),
     Boolean(priceRange),
   ].filter(Boolean).length;
 
@@ -147,6 +470,11 @@ const Itineraries = () => {
     (page - 1) * ITEMS_PER_PAGE,
     page * ITEMS_PER_PAGE
   );
+
+  const goToPage = (next) => {
+    setPage(next);
+    listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const toggleExpand = async (id) => {
     const next = expandedId === id ? null : id;
@@ -175,326 +503,245 @@ const Itineraries = () => {
     }
   };
 
-  if (loading) return <p className="text-center py-40">Loading itineraries…</p>;
-  if (error) return <p className="text-center py-40 text-red-500">{error}</p>;
+  const filterProps = {
+    search,
+    setSearch,
+    locations: allLocations,
+    selectedLocation,
+    setSelectedLocation,
+    priceRange,
+    setPriceRange,
+    comboOnly,
+    setComboOnly,
+    activeCount: activeFilterCount,
+    onClear: clearFilters,
+  };
 
   return (
-    <section
-      ref={sectionRef}
-      className="bg-white text-black py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8"
-    >
-      <header className="container max-w-7xl mx-auto mb-10 sm:mb-14">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-          Explore India Your Way
-        </h2>
-      </header>
+    <section className="section bg-ink-50">
+      <div className="container-page">
+        <header className="max-w-2xl">
+          <p className="eyebrow">Packages &amp; itineraries</p>
+          <h2 className="section-title mt-3">Explore India your way</h2>
+          <p className="section-subtitle">
+            Compare curated packages, preview the day-by-day plan and book when
+            you're ready.
+          </p>
+        </header>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8 lg:gap-12">
-        <aside
-          className={`
-    fixed inset-0 lg:z-40 z-50 bg-black/40 backdrop-blur-sm
-    lg:static lg:bg-transparent lg:backdrop-blur-none
-    ${showFilters ? "block" : "hidden"} lg:block
-  `}
-        >
-          <div
-            className="
-      absolute right-0 top-0 h-full w-[85vw] max-w-[320px]
-      bg-slate-100 p-6 rounded-l-2xl
-      overflow-y-auto lg:h-auto lg:w-full lg:max-w-none lg:rounded-2xl
-      lg:sticky lg:top-24
-    "
-          >
-            <div className="flex justify-between items-center mb-6 lg:hidden">
-              <h3 className="flex items-center gap-2 font-semibold text-lg">
-                <Tune /> Filters
-              </h3>
-              <button
-                onClick={() => setShowFilters(false)}
-                aria-label="Close filters"
-                className="text-xl font-bold"
+        <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] lg:gap-10">
+          <aside className="hidden lg:block">
+            <div className="card sticky top-24 p-6">
+              <FilterPanel idPrefix="desktop" {...filterProps} />
+            </div>
+          </aside>
+
+          <main>
+            <div ref={listTopRef} className="scroll-mt-28" />
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                role="tablist"
+                aria-label="Package type"
+                className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0"
               >
-                <Close />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="hidden lg:flex items-center gap-2 font-semibold text-lg">
-                <Tune fontSize="small" /> Filters
-              </h3>
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="text-sm font-medium text-amber-600 hover:text-amber-700"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-7">
-              <div>
-                <label className="text-sm font-medium">Search Destination</label>
-                <div className="flex items-center mt-2 px-3 border rounded-xl bg-white">
-                  <Search className="text-slate-400" />
-                  <input
-                    className="w-full px-2 py-3 text-sm outline-none bg-transparent"
-                    placeholder="Jaipur, Varanasi..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {allLocations.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium">Location</label>
-                  <select
-                    className="p-3 mt-2 w-full text-sm border rounded-xl bg-white"
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`min-h-[44px] shrink-0 rounded-full px-5 text-sm font-semibold transition ${
+                      activeTab === tab.key
+                        ? "bg-ink-900 text-white"
+                        : "bg-white text-ink-600 ring-1 ring-ink-200 hover:ring-ink-300"
+                    }`}
                   >
-                    <option value="">All Locations</option>
-                    {allLocations.map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="space-y-3 text-sm">
-                <p className="font-medium">Price Range</p>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="price"
-                    checked={priceRange === null}
-                    onChange={() => setPriceRange(null)}
-                  />
-                  Any price
-                </label>
-                {PRICE_RANGES.map((range) => (
-                  <label key={range.label} className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="price"
-                      checked={priceRange?.label === range.label}
-                      onChange={() => setPriceRange(range)}
-                    />
-                    {range.label}
-                  </label>
+                    {tab.label}
+                  </button>
                 ))}
               </div>
 
-              <div className="space-y-3 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={comboOnly}
-                    onChange={() => setComboOnly(!comboOnly)}
-                  />
-                  Combo Packages
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(true)}
+                  className="btn-outline flex-1 lg:hidden"
+                >
+                  <SlidersHorizontal size={18} aria-hidden="true" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+
+                <label className="sr-only" htmlFor="sort-select">
+                  Sort packages
                 </label>
+                <select
+                  id="sort-select"
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value)}
+                  className="input !w-auto flex-1 sm:flex-none"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.key} value={opt.key}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
+
+            {!loading && !error && (
+              <p className="mt-5 text-sm text-ink-500" aria-live="polite">
+                {filteredData.length} package{filteredData.length === 1 ? "" : "s"} found
+              </p>
+            )}
+
+            <div className="mt-5 space-y-6">
+              {loading &&
+                [0, 1, 2].map((i) => <SkeletonCard key={i} />)}
+
+              {!loading && error && (
+                <div
+                  role="alert"
+                  className="rounded-2xl border border-red-100 bg-red-50 p-8 text-center"
+                >
+                  <p className="text-sm font-medium text-red-700">{error}</p>
+                  <button
+                    type="button"
+                    onClick={() => setReloadKey((k) => k + 1)}
+                    className="btn-outline mt-4"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {!loading && !error && paginatedData.length === 0 && (
+                <div className="card p-10 text-center">
+                  <Search size={32} aria-hidden="true" className="mx-auto text-ink-300" />
+                  <p className="mt-3 font-medium text-ink-700">
+                    No packages match these filters.
+                  </p>
+                  {(activeFilterCount > 0 || activeTab !== "all") && (
+                    <button type="button" onClick={clearFilters} className="btn-outline mt-5">
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!loading &&
+                !error &&
+                paginatedData.map((trip) => (
+                  <TripCard
+                    key={trip.id}
+                    trip={trip}
+                    details={itineraryDetails[trip.id]}
+                    isExpanded={expandedId === trip.id}
+                    onToggle={() => toggleExpand(trip.id)}
+                    onReview={() => setModalDestinationId(trip.id)}
+                  />
+                ))}
+            </div>
+
+            {totalPages > 1 && (
+              <nav
+                aria-label="Pagination"
+                className="mt-10 flex items-center justify-center gap-2"
+              >
+                <button
+                  type="button"
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page === 1}
+                  aria-label="Previous page"
+                  className="btn-outline !min-h-[44px] !px-3"
+                >
+                  <ChevronLeft size={18} aria-hidden="true" />
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => goToPage(i + 1)}
+                    aria-current={page === i + 1 ? "page" : undefined}
+                    className={`h-11 w-11 rounded-xl text-sm font-semibold transition ${
+                      page === i + 1
+                        ? "bg-brand-600 text-white shadow-glow"
+                        : "bg-white text-ink-700 ring-1 ring-ink-200 hover:ring-ink-300"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page === totalPages}
+                  aria-label="Next page"
+                  className="btn-outline !min-h-[44px] !px-3"
+                >
+                  <ChevronRight size={18} aria-hidden="true" />
+                </button>
+              </nav>
+            )}
+          </main>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-[60] lg:hidden ${
+          showFilters ? "" : "pointer-events-none"
+        }`}
+      >
+        <div
+          onClick={() => setShowFilters(false)}
+          aria-hidden="true"
+          className={`absolute inset-0 bg-ink-900/50 backdrop-blur-sm transition-opacity duration-300 ${
+            showFilters ? "opacity-100" : "opacity-0"
+          }`}
+        />
+        <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filters"
+          className={`absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-lift transition-[transform,visibility] duration-300 ${
+            showFilters ? "visible translate-x-0" : "invisible translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
+            <p className="font-bold text-ink-900">Refine results</p>
+            <button
+              type="button"
+              onClick={() => setShowFilters(false)}
+              aria-label="Close filters"
+              className="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-ink-100"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-5">
+            <FilterPanel idPrefix="mobile" {...filterProps} />
+          </div>
+
+          <div className="border-t border-ink-100 p-4">
+            <button
+              type="button"
+              onClick={() => setShowFilters(false)}
+              className="btn-primary w-full"
+            >
+              Show {filteredData.length} package{filteredData.length === 1 ? "" : "s"}
+            </button>
           </div>
         </aside>
-
-        <button
-          onClick={() => setShowFilters(true)}
-          className="lg:hidden mb-4 inline-flex items-center gap-2
-             px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm w-fit"
-        >
-          <Tune fontSize="small" />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="bg-amber-400 text-slate-900 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
-
-        <main>
-          <nav className="flex flex-wrap gap-4 sm:gap-6 mb-8 sm:mb-10">
-            {["all", "best", "recommended"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`pb-2 border-b-2 text-sm sm:text-base whitespace-nowrap ${
-                  activeTab === tab
-                    ? "border-amber-400"
-                    : "border-transparent text-slate-400"
-                }`}
-              >
-                {tab === "all"
-                  ? "All Packages"
-                  : tab === "best"
-                  ? "Best Deals"
-                  : "Recommended"}
-              </button>
-            ))}
-          </nav>
-
-          {paginatedData.length === 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
-              <p className="text-slate-500">No packages match these filters.</p>
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="mt-3 text-sm font-medium text-amber-600 hover:text-amber-700"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-10 sm:space-y-16">
-            {paginatedData.map((trip) => {
-              const details = itineraryDetails[trip.id];
-              const isExpanded = expandedId === trip.id;
-
-              return (
-                <article
-                  key={trip.id}
-                  className="itinerary grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 rounded-3xl border border-slate-100 p-4 sm:p-6 shadow-sm"
-                >
-                  <img
-                    src={trip.image}
-                    alt={trip.title}
-                    className="h-56 sm:h-72 lg:h-[300px] w-full object-cover rounded-2xl sm:rounded-3xl"
-                  />
-
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <h3 className="text-xl sm:text-2xl font-semibold">
-                        {trip.title}
-                      </h3>
-                      {trip.tag && (
-                        <span className="inline-block text-xs px-3 py-1 rounded-full bg-emerald-300 shrink-0">
-                          {trip.tag}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm flex-wrap">
-                      <span className="flex items-center gap-2">
-                        <CalendarToday fontSize="small" />
-                        {trip.duration}
-                      </span>
-                      {trip.route && (
-                        <span className="flex items-center gap-2">
-                          <Route fontSize="small" />
-                          {trip.route}
-                        </span>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => toggleExpand(trip.id)}
-                      className="flex items-center gap-2 text-sm font-medium"
-                    >
-                      Day-wise Itinerary
-                      <ExpandMore
-                        className="transition-transform"
-                        style={{
-                          transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                        }}
-                      />
-                    </button>
-
-                    {isExpanded && (
-                      <>
-                        {details?.loading && (
-                          <div className="space-y-3">
-                            {Array.from({ length: 3 }).map((_, i) => (
-                              <Skeleton key={i} variant="text" height={40} />
-                            ))}
-                          </div>
-                        )}
-
-                        {details?.error && (
-                          <p className="text-sm text-red-600">{details.error}</p>
-                        )}
-
-                        {details && !details.loading && !details.error && (
-                          <>
-                            {details.days.length === 0 ? (
-                              <p className="text-sm text-slate-500">
-                                Day-wise details for this package are coming soon.
-                              </p>
-                            ) : (
-                              <ul className="relative pl-6 space-y-3 text-sm">
-                                <span className="absolute left-[9px] top-0 h-full w-[2px] bg-slate-700" />
-                                {details.days.map((day) => (
-                                  <li key={day.dayNumber} className="flex gap-4">
-                                    <span className="w-3 h-3 mt-1 rounded-full bg-amber-400 shrink-0" />
-                                    <p>
-                                      <strong>
-                                        Day {day.dayNumber}: {day.title}
-                                      </strong>
-                                      <br />
-                                      {day.description}
-                                    </p>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
-                      <div>
-                        <span className="text-xl sm:text-2xl font-bold">
-                          ₹{trip.discountedPrice?.toLocaleString()}
-                        </span>
-                        {trip.price && (
-                          <span className="line-through ml-2 text-slate-400 text-sm sm:text-base">
-                            ₹{trip.price.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          onClick={() => setModalDestinationId(trip.id)}
-                          className="px-5 py-2.5 sm:py-3 border-2 border-slate-900 rounded-full font-semibold text-sm hover:bg-slate-900 hover:text-white transition"
-                        >
-                          Review Itinerary
-                        </button>
-
-                        <Link to={`/booking?destinationId=${trip.id}`}>
-                          <button className="px-6 py-2.5 sm:py-3 bg-amber-400 rounded-full font-semibold text-sm whitespace-nowrap">
-                            Book Package <ArrowForward fontSize="small" />
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-12 sm:mt-16">
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  className={`px-4 py-2 rounded-full text-sm ${
-                    page === i + 1 ? "bg-amber-400" : "bg-slate-800 text-white"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-          )}
-        </main>
       </div>
 
       <ItineraryModal
@@ -504,6 +751,4 @@ const Itineraries = () => {
       />
     </section>
   );
-};
-
-export default Itineraries;
+}

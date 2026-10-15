@@ -4,7 +4,6 @@ import { FaFacebookF, FaInstagram, FaXTwitter, FaYoutube } from "react-icons/fa6
 
 const EXPLORE_LINKS = [
   { label: "Destinations", to: "/destination" },
-  { label: "Itineraries", to: "/itineary" },
   { label: "Book a trip", to: "/booking" },
   { label: "Plan with AI", to: "/chat" },
 ];
@@ -12,8 +11,8 @@ const EXPLORE_LINKS = [
 const COMPANY_LINKS = [
   { label: "About us", to: "/aboutpage" },
   { label: "Contact", to: "/contact" },
-  // { label: "My bookings", to: "/booking-history" },
-  // { label: "My profile", to: "/profile" },
+  { label: "My bookings", to: "/booking-history" },
+  { label: "My profile", to: "/profile" },
 ];
 
 const SOCIAL_LINKS = [

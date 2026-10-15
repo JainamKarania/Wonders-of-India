@@ -1,27 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@mui/material";
-import { Map, LocationOn, TrendingUp } from "@mui/icons-material";
+import { Map as MapIcon, MapPin, TrendingUp, Sparkles } from "lucide-react";
 
 const HIGHLIGHTS = [
   {
-    icon: Map,
-    title: "Curated Regions",
-    desc: "Handpicked destinations across North, South, East & West India.",
+    icon: MapIcon,
+    title: "Curated regions",
+    desc: "Handpicked destinations across North, South, East and West India.",
   },
   {
-    icon: LocationOn,
-    title: "Hidden Gems",
-    desc: "Discover lesser-known places beyond typical tourist routes.",
+    icon: MapPin,
+    title: "Hidden gems",
+    desc: "Discover lesser-known places beyond the typical tourist routes.",
   },
   {
     icon: TrendingUp,
-    title: "Seasonal Picks",
-    desc: "Best destinations recommended based on weather & festivals.",
+    title: "Seasonal picks",
+    desc: "The best places to go, matched to weather and festivals.",
   },
 ];
 
-function useInView(threshold = 0.2) {
+function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
 
@@ -36,7 +35,7 @@ function useInView(threshold = 0.2) {
           observer.disconnect();
         }
       },
-      { threshold, rootMargin: "0px 0px -10% 0px" }
+      { threshold }
     );
 
     observer.observe(el);
@@ -47,106 +46,80 @@ function useInView(threshold = 0.2) {
 }
 
 export default function DestinationsCTA() {
-  const [headingRef, headingInView] = useInView(0.3);
-  const [gridRef, gridInView] = useInView(0.2);
-  const [actionRef, actionInView] = useInView(0.2);
+  const [ref, inView] = useInView();
+
+  const reveal = (delay = 0) => ({
+    style: { transitionDelay: inView ? `${delay}ms` : "0ms" },
+    className: `transition-all duration-700 ease-out motion-reduce:transition-none ${
+      inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+    }`,
+  });
 
   return (
     <section
+      ref={ref}
       aria-labelledby="destinations-cta-heading"
-      className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-teal-600 to-cyan-600"
+      className="section relative overflow-hidden bg-ink-900"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_bottom,white,transparent_65%)]"
+        className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[44rem] -translate-x-1/2 rounded-full bg-brand-600/20 blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
-        <div className="space-y-12 sm:space-y-14 text-center">
-          {/* Heading */}
-          <header
-            ref={headingRef}
-            className={`max-w-full transition-all duration-1000 ease-out ${
-              headingInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-14"
-            }`}
+      <div className="container-page relative">
+        <header {...reveal()} className={`mx-auto max-w-2xl text-center ${reveal().className}`}>
+          <p className="eyebrow !text-brand-400">Destinations</p>
+          <h2
+            id="destinations-cta-heading"
+            className="section-title mt-3 !text-white"
           >
-            <h2
-              id="destinations-cta-heading"
-              className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
-            >
-              Every Destination Tells a Story
-              <span className="block text-slate-900">Which One Will You Discover?</span>
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-white/90 sm:text-lg max-w-2xl mx-auto">
-              From royal palaces and sacred ghats to hidden hill towns and tropical
-              coastlines — explore India through destinations carefully curated by
-              local experts.
-            </p>
-          </header>
+            Every destination tells a story
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-ink-300 sm:text-lg">
+            From royal palaces and sacred ghats to hidden hill towns and
+            tropical coastlines, explore India through places curated by local
+            experts.
+          </p>
+        </header>
 
-          {/* Highlight Grid */}
-          <div
-            ref={gridRef}
-            className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3"
-          >
-            {HIGHLIGHTS.map(({ icon: Icon, title, desc }, index) => (
-              <article
+        <ul className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {HIGHLIGHTS.map(({ icon: Icon, title, desc }, index) => {
+            const { style, className } = reveal(index * 120);
+
+            return (
+              <li
                 key={title}
-                style={{ transitionDelay: gridInView ? `${index * 120}ms` : "0ms" }}
-                className={`rounded-2xl bg-white/90 p-6 text-left shadow-xl backdrop-blur transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-2xl ${
-                  gridInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
+                style={style}
+                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-6 ${className}`}
               >
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                  <Icon className="text-emerald-700" fontSize="medium" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-700">{desc}</p>
-              </article>
-            ))}
-          </div>
+                <span
+                  aria-hidden="true"
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white shadow-glow"
+                >
+                  <Icon size={22} />
+                </span>
+                <h3 className="mt-5 text-lg font-bold !text-white">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-300">{desc}</p>
+              </li>
+            );
+          })}
+        </ul>
 
-          {/* CTA Actions */}
-          <div
-            ref={actionRef}
-            className="flex flex-wrap items-center justify-center gap-3 sm:gap-4"
+        <div
+          {...reveal(360)}
+          className={`mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row ${reveal(360).className}`}
+        >
+          <Link to="/destination" className="btn-primary">
+            <MapIcon size={18} aria-hidden="true" />
+            View all destinations
+          </Link>
+          <Link
+            to="/chat"
+            className="btn border border-white/30 text-white hover:bg-white/10"
           >
-            <div
-              style={{ transitionDelay: actionInView ? "0ms" : "0ms" }}
-              className={`transition-all duration-700 ease-out ${
-                actionInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
-              }`}
-            >
-              <Button
-                component={Link}
-                to="/destination"
-                variant="contained"
-                size="large"
-                startIcon={<Map />}
-                className="!rounded-2xl !bg-slate-900 !px-6 sm:!px-7 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !normal-case hover:!bg-black"
-              >
-                View All Destinations
-              </Button>
-            </div>
-
-            <div
-              style={{ transitionDelay: actionInView ? "150ms" : "0ms" }}
-              className={`transition-all duration-700 ease-out ${
-                actionInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
-              }`}
-            >
-              <Button
-                component={Link}
-                to="/contact"
-                variant="outlined"
-                size="large"
-                startIcon={<LocationOn />}
-                className="!rounded-2xl !border-white !px-6 sm:!px-7 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !text-white !normal-case hover:!border-white hover:!bg-white/10"
-              >
-                Find My Destination
-              </Button>
-            </div>
-          </div>
+            <Sparkles size={18} aria-hidden="true" />
+            Help me choose
+          </Link>
         </div>
       </div>
     </section>

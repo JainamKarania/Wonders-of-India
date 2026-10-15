@@ -15,7 +15,6 @@ import { useAuth } from "./context/AuthContext.jsx";
 
 const NAV_LINKS = [
   { name: "Destinations", path: "/destination" },
-  { name: "Itineraries", path: "/itineary" },
   { name: "Bookings", path: "/booking" },
   { name: "About", path: "/aboutpage" },
   { name: "Contact", path: "/contact" },

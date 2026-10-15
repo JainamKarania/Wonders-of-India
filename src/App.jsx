@@ -15,7 +15,6 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const DestinationPage = lazy(() => import("./pages/DestinationPage"));
-const ItinerariesPage = lazy(() => import("./pages/ItineariesPage.jsx"));
 const BookingHistoryPage = lazy(() => import("./pages/BookingHistoryPage.jsx"));
 const TransactionHistoryPage = lazy(() =>
   import("./pages/TransactionHistoryPage.jsx")
@@ -81,11 +80,8 @@ function AppRoutes() {
           <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/aboutpage" element={<AboutPage />} />
           <Route path="/destination" element={<DestinationPage />} />
-          <Route path="/itineary" element={<ItinerariesPage />} />
-          <Route
-            path="/itinerary"
-            element={<Navigate to="/itineary" replace />}
-          />
+          <Route path="/itineary" element={<Navigate to="/destination" replace />} />
+          <Route path="/itinerary" element={<Navigate to="/destination" replace />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/chat" element={<ChatPage />} />

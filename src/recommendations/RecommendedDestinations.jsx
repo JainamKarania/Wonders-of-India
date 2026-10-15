@@ -1,20 +1,34 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
-import { Skeleton } from "@mui/material";
+import { Sparkles, MapPin } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
-const RecommendedDestinations = ({ destinationId, mode = "similar", title }) => {
+const DEFAULT_TITLES = {
+  similar: "You may also like",
+  personalized: "Picked for you",
+};
+
+const formatPrice = (value) => `₹${Number(value).toLocaleString("en-IN")}`;
+
+export default function RecommendedDestinations({
+  destinationId,
+  mode = "similar",
+  title,
+}) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (mode === "similar" && !destinationId) {
-      setLoading(false);
       setItems([]);
-      return;
+      setLoading(false);
+      return undefined;
     }
 
-    const fetchRecommendations = async () => {
+    let cancelled = false;
+
+    const load = async () => {
       try {
         setLoading(true);
 
@@ -32,6 +46,8 @@ const RecommendedDestinations = ({ destinationId, mode = "similar", title }) => 
             : undefined
         );
 
+        if (cancelled) return;
+
         setItems(
           mode === "personalized"
             ? res.data.personalized ?? []
@@ -39,60 +55,74 @@ const RecommendedDestinations = ({ destinationId, mode = "similar", title }) => 
         );
       } catch (err) {
         console.error(err);
-        setItems([]);
+        if (!cancelled) setItems([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchRecommendations();
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [destinationId, mode]);
 
   if (!loading && items.length === 0) return null;
 
   return (
-    <div className="mt-6">
-      <h3 className="text-base font-semibold text-slate-800 mb-3">{title}</h3>
+    <section className="mt-8" aria-label={title ?? DEFAULT_TITLES[mode]}>
+      <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-ink-900">
+        <Sparkles size={18} aria-hidden="true" className="text-brand-600" />
+        {title ?? DEFAULT_TITLES[mode]}
+      </h3>
 
       {loading ? (
-        <div className="flex gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton
-              key={i}
-              variant="rounded"
-              width={150}
-              height={110}
-              className="!rounded-xl shrink-0"
-            />
+        <div className="flex gap-4" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="skeleton h-40 w-44 shrink-0" />
           ))}
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-          {items.map((d) => (
-            <div
-              key={d.id}
-              className="min-w-[150px] max-w-[150px] shrink-0 rounded-xl border border-orange-100 bg-orange-50 p-3"
-            >
-              {d.image && (
-                <img
-                  src={d.image}
-                  alt={d.title}
-                  className="h-20 w-full rounded-lg object-cover mb-2"
-                  loading="lazy"
-                />
-              )}
-              <p className="text-sm font-semibold text-slate-800 truncate">
-                {d.title}
-              </p>
-              <p className="text-xs text-slate-500">
-                ₹{(d.discountedPrice ?? d.price ?? 0).toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+        <ul className="scrollbar-hide -mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2">
+          {items.map((d) => {
+            const price = d.discountedPrice ?? d.price;
 
-export default RecommendedDestinations;
+            return (
+              <li key={d.id} className="w-44 shrink-0 snap-start">
+                <Link
+                  to={`/booking?destinationId=${d.id}`}
+                  className="card-hover group block overflow-hidden"
+                >
+                  <div className="relative h-24 bg-gradient-to-br from-brand-100 to-brand-200">
+                    {d.image ? (
+                      <img
+                        src={d.image}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-brand-500">
+                        <MapPin size={24} aria-hidden="true" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="truncate text-sm font-semibold text-ink-900">
+                      {d.title}
+                    </p>
+                    {price ? (
+                      <p className="mt-0.5 text-xs font-medium text-brand-700">
+                        {formatPrice(price)}
+                      </p>
+                    ) : null}
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}

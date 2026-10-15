@@ -11,8 +11,6 @@ const EXPLORE_LINKS = [
 const COMPANY_LINKS = [
   { label: "About us", to: "/aboutpage" },
   { label: "Contact", to: "/contact" },
-  { label: "My bookings", to: "/booking-history" },
-  { label: "My profile", to: "/profile" },
 ];
 
 const SOCIAL_LINKS = [

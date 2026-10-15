@@ -1,24 +1,21 @@
-import React from 'react'
-import Destination from '../Components/Destination'
-import Navbar from '../Components/Navbar'
-import Reviews from '../Components/Reviews'
-import DestinationCTA from '../Components/DestinationCTA'
-import ContactUs from '../Components/ContactUs'
-import Footer from '../Components/Footer'
-import { Banner4 } from '../assets/index'
-import Itineraries from '../Components/itinearies/Itineraries'
-const DestinationPage = () => {
-  return (
-    <div>
-        <Navbar/>
-        <Itineraries/>
-        <DestinationCTA/>
-        <Destination/>
-        <Reviews/>
-        {/* <ContactUs/> */}
-        <Footer/>
-    </div>
-  )
-}
+import Navbar from "../Components/Navbar";
+import Itineraries from "../Components/itinearies/Itineraries";
+import DestinationCTA from "../Components/DestinationCTA";
+import Reviews from "../Components/Reviews";
+import Footer from "../Components/Footer";
 
-export default DestinationPage
+const DestinationPage = () => (
+  <div className="min-h-screen bg-ink-50">
+    <Navbar />
+
+    <main className="pt-16 sm:pt-[72px]">
+      <Itineraries />
+      <DestinationCTA />
+      <Reviews />
+    </main>
+
+    <Footer />
+  </div>
+);
+
+export default DestinationPage;

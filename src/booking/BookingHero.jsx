@@ -1,85 +1,85 @@
-import React from "react";
+import { memo } from "react";
+import { Compass, Headset, MapPin, Wallet } from "lucide-react";
 import BookingForm from "./BookingForm";
-import { LocationOn, Star, SupportAgent } from "@mui/icons-material";
 
-const BookingHero = () => {
+const FEATURES = [
+  {
+    icon: Compass,
+    title: "Handcrafted itineraries",
+    desc: "Routes planned by people who know them.",
+  },
+  {
+    icon: MapPin,
+    title: "Trusted local guides",
+    desc: "Experts on the ground at every stop.",
+  },
+  {
+    icon: Wallet,
+    title: "Clear pricing",
+    desc: "Per-person rates with no hidden charges.",
+  },
+  {
+    icon: Headset,
+    title: "Travel support",
+    desc: "Help before, during and after your trip.",
+  },
+];
+
+function BookingHero() {
   return (
     <section
+      id="booking-form"
       aria-labelledby="booking-hero-heading"
-      className="relative isolate overflow-hidden"
+      className="relative isolate scroll-mt-20 overflow-hidden"
     >
-      
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-green-50" />
-      <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-green-200/30 blur-3xl" />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-50 via-white to-ink-50"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-brand-200/40 blur-3xl"
+      />
 
-      {/* Content */}
-      <div className="relative mx-auto max-w-7xl px-6 py-20">
-        <div className="grid items-center gap-16 lg:grid-cols-2">
-          
-          
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1 text-sm font-medium text-orange-700">
-              <LocationOn fontSize="small" />
-              Explore Incredible India
-            </div>
-
+      <div className="container-page py-10 sm:py-16 lg:py-20">
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_minmax(0,32rem)] lg:gap-16">
+          <div className="lg:sticky lg:top-28">
+            <p className="eyebrow">Book your trip</p>
             <h1
               id="booking-hero-heading"
-              className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+              className="mt-3 font-display text-3xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl"
             >
-              Plan Your Next Journey with <br />
-              <span className="text-orange-600">Wonders Of India</span>
+              Plan your next journey with{" "}
+              <span className="text-brand-600">Wonders of India</span>
             </h1>
-
-            <p className="max-w-xl text-lg text-slate-600">
-              From spiritual escapes to royal heritage and breathtaking
-              landscapes, we curate unforgettable travel experiences across
-              India — crafted just for you.
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-600 sm:text-lg">
+              Choose a package, add your travellers and confirm in a couple of
+              minutes. You can review everything in My Bookings afterwards.
             </p>
 
-            
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="flex items-center gap-3 rounded-xl bg-white/70 p-4 shadow-sm">
-                <Star className="text-yellow-500" />
-                <div>
-                  <p className="font-semibold text-slate-800">4.8 / 5</p>
-                  <p className="text-sm text-slate-500">Traveler Ratings</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-xl bg-white/70 p-4 shadow-sm">
-                <LocationOn className="text-orange-500" />
-                <div>
-                  <p className="font-semibold text-slate-800">50+ Routes</p>
-                  <p className="text-sm text-slate-500">Across India</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-xl bg-white/70 p-4 shadow-sm">
-                <SupportAgent className="text-green-600" />
-                <div>
-                  <p className="font-semibold text-slate-800">24/7</p>
-                  <p className="text-sm text-slate-500">Travel Support</p>
-                </div>
-              </div>
-            </div>
-
-            
-            <p className="text-sm text-slate-500">
-              ✨ Handcrafted itineraries • Trusted local guides • Best price
-              guarantee
-            </p>
+            <ul className="mt-8 hidden gap-4 sm:grid sm:grid-cols-2">
+              {FEATURES.map(({ icon: Icon, title, desc }) => (
+                <li key={title} className="flex items-start gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700"
+                  >
+                    <Icon size={20} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-ink-900">{title}</p>
+                    <p className="mt-0.5 text-sm text-ink-600">{desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          
-          <div className="flex justify-center lg:justify-end">
-            <BookingForm />
-          </div>
+          <BookingForm />
         </div>
       </div>
     </section>
   );
-};
+}
 
-export default React.memo(BookingHero);
+export default memo(BookingHero);

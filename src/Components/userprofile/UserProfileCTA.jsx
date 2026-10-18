@@ -6,7 +6,7 @@ const UserProfileCTA = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="bg-white py-10">
+    <section className="py-10">
         <div className="container max-w-7xl mx-auto px-4">
     <aside
       aria-labelledby="profile-cta-heading"

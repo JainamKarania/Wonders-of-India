@@ -1,62 +1,44 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { FaSuitcaseRolling, FaRoute } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { Compass, Luggage } from "lucide-react";
 
-const UserProfileCTA = () => {
-  const navigate = useNavigate();
-
+export default function UserProfileCTA() {
   return (
-    <section className="bg-white py-10">
-        <div className="container max-w-7xl mx-auto px-4">
-    <aside
+    <section
       aria-labelledby="profile-cta-heading"
-      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600 text-white shadow-2xl"
+      className="relative overflow-hidden rounded-3xl bg-ink-900 p-6 text-white sm:p-8 lg:p-10"
     >
-      <div className="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-white/20 blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-600/30 blur-3xl"
+      />
 
-      <div className="relative z-10 p-6 sm:p-8 items-center justify-center lg:p-10 flex flex-col gap-6">
-        <header className="space-y-2">
+      <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="max-w-xl">
           <h2
             id="profile-cta-heading"
-            className="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight"
+            className="font-display text-2xl font-extrabold text-balance sm:text-3xl"
           >
             Ready for your next adventure?
           </h2>
-          <p className="text-white/90 max-w-2xl text-center text-sm sm:text-md">
-            Discover breathtaking destinations across India and create memories
-            that last a lifetime.
+          <p className="mt-2 text-sm text-ink-300 sm:text-base">
+            Explore destinations across India and plan your next trip.
           </p>
-        </header>
+        </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={() => navigate("/")}
-            className="inline-flex items-center justify-center gap-3 rounded-xl bg-white px-6 py-3 text-orange-600 font-semibold shadow-lg hover:bg-orange-50 transition"
+        <div className="flex flex-col gap-3 sm:flex-row md:shrink-0">
+          <Link to="/booking" className="btn-primary">
+            <Luggage size={18} aria-hidden="true" />
+            Book a new trip
+          </Link>
+          <Link
+            to="/destination"
+            className="btn border border-white/30 text-white hover:bg-white/10"
           >
-            <FaSuitcaseRolling size={18} />
-            Book a New Trip
-          </button>
-
-          <button
-            onClick={() => navigate("/booking-history")}
-            className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10 transition"
-          >
-            <FaRoute size={18} />
-            View My Bookings
-          </button>
+            <Compass size={18} aria-hidden="true" />
+            Browse destinations
+          </Link>
         </div>
       </div>
-      <footer className="p-4 border-t text-center border-white/30 text-sm text-white/80">
-          ✈️ Trusted by thousands of travelers exploring{" "}
-          <span className="font-semibold text-white">
-            Wonders of India
-          </span>
-        </footer>
-    </aside>
-    </div>
     </section>
   );
-};
-
-export default UserProfileCTA;
+}

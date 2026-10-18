@@ -23,10 +23,12 @@ const UserProfilePage = () => (
           </header>
 
           <BookingDetails />
-          <UserProfileCTA />
+          
         </div>
       </div>
     </main>
+
+    <UserProfileCTA />
 
     <Footer showCta={false} />
   </div>

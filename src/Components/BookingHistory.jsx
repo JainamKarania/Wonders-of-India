@@ -1,21 +1,62 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 import {
-  CheckCircle,
-  ArrowRightAlt,
+  ArrowRight,
+  CalendarDays,
+  Download,
+  Loader2,
+  Luggage,
   Phone,
-  CalendarToday,
-  Route,
-} from "@mui/icons-material";
-import { Skeleton } from "@mui/material";
+  RefreshCw,
+} from "lucide-react";
 import { useAuth } from "../Components/context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import RecommendedDestinations from "../recommendations/RecommendedDestinations";
 
 const formatBookingRef = (id) => `WOI-${String(id).padStart(6, "0")}`;
+const formatPrice = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
+const formatDate = (value) =>
+  new Date(value).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+const formatLocations = (locations) =>
+  Array.isArray(locations) ? locations.join(", ") : locations ?? "";
 
-const BookingHistory = () => {
+const STATUS_BADGE = {
+  confirmed: "badge-success",
+  cancelled: "badge-danger",
+};
+
+function HistorySkeleton() {
+  return (
+    <div className="space-y-6" aria-hidden="true">
+      {[0, 1].map((i) => (
+        <div key={i} className="skeleton h-72 w-full !rounded-3xl" />
+      ))}
+    </div>
+  );
+}
+
+function InvoiceRow({ label, value, strong = false }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2.5">
+      <dt className="text-sm text-ink-600">{label}</dt>
+      <dd
+        className={`text-right text-sm ${
+          strong ? "text-base font-bold text-ink-900" : "font-medium text-ink-900"
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+export default function BookingHistory() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const invoiceRefs = useRef({});
@@ -23,16 +64,20 @@ const BookingHistory = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading) return undefined;
 
     if (!user) {
       navigate("/auth");
-      return;
+      return undefined;
     }
 
-    const fetchBookings = async () => {
+    let cancelled = false;
+
+    const load = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -41,212 +86,220 @@ const BookingHistory = () => {
           data: { session },
         } = await supabase.auth.getSession();
 
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/bookings`,
-          { headers: { Authorization: `Bearer ${session?.access_token}` } }
-        );
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/bookings`, {
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
 
-        setBookings(res.data.data ?? []);
+        if (!cancelled) setBookings(res.data.data ?? []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load your bookings.");
+        if (!cancelled) setError("We couldn't load your bookings.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchBookings();
-  }, [user, authLoading, navigate]);
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading, navigate, reloadKey]);
 
   const downloadInvoice = async (bookingId) => {
     const node = invoiceRefs.current[bookingId];
     if (!node) return;
 
-    // Loaded on demand — most visitors never click this, so there's no
-    // reason to ship these two libraries in everyone's initial bundle.
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import("html2canvas"),
-      import("jspdf"),
-    ]);
+    setDownloadingId(bookingId);
 
-    const canvas = await html2canvas(node, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Invoice_${formatBookingRef(bookingId)}.pdf`);
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice_${formatBookingRef(bookingId)}.pdf`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Couldn't create the invoice. Please try again.");
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="space-y-6">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Skeleton key={i} variant="rounded" height={280} className="!rounded-3xl" />
-        ))}
-      </div>
-    );
-  }
+  if (authLoading || loading) return <HistorySkeleton />;
 
   if (error) {
     return (
-      <section className="flex min-h-[40vh] items-center justify-center bg-orange-50 px-4 rounded-3xl">
-        <p className="text-slate-600">{error}</p>
-      </section>
+      <div className="card flex flex-col items-center gap-4 px-6 py-14 text-center">
+        <p className="text-ink-700">{error}</p>
+        <button
+          type="button"
+          onClick={() => setReloadKey((k) => k + 1)}
+          className="btn-outline"
+        >
+          <RefreshCw size={16} aria-hidden="true" />
+          Try again
+        </button>
+      </div>
     );
   }
 
   if (bookings.length === 0) {
     return (
-      <section className="flex min-h-[60vh] items-center justify-center bg-orange-50 px-4 rounded-3xl">
-        <div className="text-center space-y-4">
-          <p className="text-lg font-medium text-slate-700">No bookings yet</p>
-          <button
-            onClick={() => navigate("/destination")}
-            className="rounded-xl bg-orange-600 px-6 py-3 text-white font-semibold shadow hover:bg-orange-700 transition"
-          >
-            Start a Booking
-          </button>
+      <div className="card flex flex-col items-center gap-4 px-6 py-16 text-center">
+        <span
+          aria-hidden="true"
+          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-700"
+        >
+          <Luggage size={26} />
+        </span>
+        <div>
+          <p className="text-lg font-bold text-ink-900">No bookings yet</p>
+          <p className="mt-1 text-sm text-ink-600">
+            Your confirmed trips will show up here.
+          </p>
         </div>
-      </section>
+        <Link to="/destination" className="btn-primary">
+          Browse packages
+        </Link>
+      </div>
     );
   }
 
   return (
-    <main className="space-y-12">
+    <div className="space-y-8">
       <RecommendedDestinations mode="personalized" title="Recommended for you" />
 
       {bookings.map((booking) => {
-        const perPerson =
-          booking.destination.discountedPrice ?? booking.destination.price ?? 0;
+        const destination = booking.destination ?? {};
+        const perPerson = destination.discountedPrice ?? destination.price ?? 0;
+        const status = String(booking.status ?? "").toLowerCase();
+        const ref = formatBookingRef(booking.id);
+        const isDownloading = downloadingId === booking.id;
 
         return (
-          <section
-            key={booking.id}
-            className="rounded-3xl bg-white shadow-2xl border border-orange-100 overflow-hidden p-6 sm:p-8"
-          >
-            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <article key={booking.id} className="card overflow-hidden">
+            <header className="flex flex-col gap-3 border-b border-ink-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
-                <p className="text-sm text-slate-500">Booking ID</p>
-                <p className="text-lg font-semibold text-slate-800">
-                  {formatBookingRef(booking.id)}
+                <p className="text-xs font-medium uppercase tracking-wide text-ink-500">
+                  Booking ID
                 </p>
+                <p className="font-display text-lg font-bold text-ink-900">{ref}</p>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-5 py-2 text-sm font-semibold text-green-700 capitalize">
-                <CheckCircle fontSize="small" />
+              <span className={`${STATUS_BADGE[status] ?? "badge"} capitalize`}>
                 {booking.status}
               </span>
             </header>
 
-            <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 sm:p-6 rounded-2xl mb-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Route fontSize="small" />
-                  <span className="font-medium">
-                    {booking.fromCity}
-                    <ArrowRightAlt className="mx-1 inline" />
-                    {Array.isArray(booking.destination.locations)
-                      ? booking.destination.locations.join(", ")
-                      : booking.destination.locations}
+            <div className="space-y-6 p-5 sm:p-6">
+              <div className="rounded-2xl bg-brand-50/70 p-4 sm:p-5">
+                <p className="font-semibold text-ink-900">{destination.title}</p>
+                <div className="mt-3 flex flex-col gap-2 text-sm text-ink-700 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
+                  <span className="flex items-center gap-2">
+                    <span className="font-medium">{booking.fromCity}</span>
+                    <ArrowRight size={14} aria-hidden="true" className="text-ink-400" />
+                    <span>{formatLocations(destination.locations)}</span>
                   </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-slate-700">
-                  <CalendarToday fontSize="small" />
-                  <span className="font-medium">
-                    {new Date(booking.travelDate).toDateString()}
+                  <span className="flex items-center gap-2">
+                    <CalendarDays size={16} aria-hidden="true" className="text-ink-500" />
+                    {formatDate(booking.travelDate)}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between text-slate-700">
-                <p>
-                  <span className="font-medium">Package:</span>{" "}
-                  {booking.destination.title}
-                </p>
-                <p>
-                  <span className="font-medium">Account:</span> {user.email}
-                </p>
-              </div>
-            </div>
+              <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,22rem)]">
+                <section aria-label="Travellers">
+                  <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-500">
+                    Travellers ({booking.travelers.length})
+                  </h3>
+                  <ul className="grid gap-3 sm:grid-cols-2">
+                    {booking.travelers.map((traveler) => (
+                      <li
+                        key={traveler.id}
+                        className="rounded-2xl border border-ink-100 p-4"
+                      >
+                        <p className="font-semibold text-ink-900">{traveler.name}</p>
+                        <p className="mt-0.5 text-sm text-ink-600">
+                          {traveler.age} yrs · {traveler.gender}
+                        </p>
+                        {traveler.mobile ? (
+                          <p className="mt-2 flex items-center gap-1.5 text-sm text-ink-600">
+                            <Phone size={14} aria-hidden="true" />
+                            {traveler.mobile}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
 
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 bg-white space-y-6">
-                <h2 className="text-2xl font-semibold text-orange-500">
-                  Passenger Details
-                </h2>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-                  {booking.travelers.map((traveler) => (
-                    <article
-                      key={traveler.id}
-                      className="rounded-xl border border-orange-200 p-4 bg-orange-50 shadow hover:shadow-lg transition"
-                    >
-                      <p className="mb-2 text-xl font-semibold text-orange-600">
-                        {traveler.name}
-                      </p>
-                      <p className="text-sm text-slate-700">
-                        {traveler.age} yrs • {traveler.gender}
-                      </p>
-                      {traveler.mobile && (
-                        <div className="mt-3 flex items-center gap-2 text-sm text-slate-700">
-                          <Phone fontSize="small" /> {traveler.mobile}
-                        </div>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              </div>
+                <section aria-label="Invoice">
+                  <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-500">
+                    Invoice
+                  </h3>
 
-              <div className="flex flex-col gap-4">
-                <h2 className="text-2xl font-semibold text-orange-600 mb-4">
-                  Invoice
-                </h2>
-                <div
-                  ref={(el) => (invoiceRefs.current[booking.id] = el)}
-                  className="flex-1 bg-orange-50 border border-orange-200 rounded-2xl p-6 shadow-lg"
-                >
-                  <div className="grid grid-cols-2 gap-4 text-black">
-                    <p>
-                      <span className="font-medium">Package:</span>{" "}
-                      {booking.destination.title}
-                    </p>
-                    <p>
-                      <span className="font-medium">Number of Travelers:</span>{" "}
-                      {booking.travelers.length}
-                    </p>
-                    <p>
-                      <span className="font-medium">Price per Person:</span> ₹
-                      {perPerson.toLocaleString()}
-                    </p>
-                    <p>
-                      <span className="font-medium">Total Price:</span> ₹
-                      {booking.totalPrice.toLocaleString()}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => downloadInvoice(booking.id)}
-                    className="mt-6 rounded-xl bg-orange-600 px-6 py-2 text-white font-semibold shadow hover:bg-orange-700 transition"
+                  <div
+                    ref={(el) => {
+                      invoiceRefs.current[booking.id] = el;
+                    }}
+                    style={{ backgroundColor: "#ffffff" }}
+                    className="rounded-2xl border border-ink-100 p-5"
                   >
-                    Download Invoice
-                  </button>
-                </div>
+                    <div className="mb-3 flex items-center justify-between border-b border-ink-100 pb-3">
+                      <p className="font-bold text-ink-900">Wonders of India</p>
+                      <p className="text-xs text-ink-600">{ref}</p>
+                    </div>
+                    <dl className="divide-y divide-ink-100">
+                      <InvoiceRow label="Package" value={destination.title} />
+                      <InvoiceRow label="Travel date" value={formatDate(booking.travelDate)} />
+                      <InvoiceRow label="Travellers" value={booking.travelers.length} />
+                      <InvoiceRow label="Price per person" value={formatPrice(perPerson)} />
+                      <InvoiceRow label="Total" value={formatPrice(booking.totalPrice)} strong />
+                    </dl>
+                    {user?.email ? (
+                      <p className="mt-3 text-xs text-ink-600">Billed to {user.email}</p>
+                    ) : null}
+                  </div>
+
+                  {status !== "cancelled" ? (
+                    <button
+                      type="button"
+                      onClick={() => downloadInvoice(booking.id)}
+                      disabled={isDownloading}
+                      className="btn-outline mt-3 w-full disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isDownloading ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                          Preparing PDF…
+                        </>
+                      ) : (
+                        <>
+                          <Download size={16} aria-hidden="true" />
+                          Download invoice
+                        </>
+                      )}
+                    </button>
+                  ) : null}
+                </section>
               </div>
             </div>
-          </section>
+          </article>
         );
       })}
 
       <div className="flex justify-center">
-        <button
-          onClick={() => navigate("/")}
-          className="rounded-2xl bg-orange-600 px-10 py-3 text-white font-semibold shadow-lg hover:bg-orange-700 transition"
-        >
-          Book Another Trip
-        </button>
+        <Link to="/booking" className="btn-primary">
+          Book another trip
+        </Link>
       </div>
-    </main>
+    </div>
   );
-};
-
-export default BookingHistory;
+}

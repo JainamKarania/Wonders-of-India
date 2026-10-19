@@ -1,140 +1,84 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
 import { Link } from "react-router-dom";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Button } from "@mui/material";
-import { Diversity3, Public, VolunteerActivism } from "@mui/icons-material";
-
-gsap.registerPlugin(ScrollTrigger);
+import { Globe, HeartHandshake, MessageCircle, Users } from "lucide-react";
 
 const VALUES = [
   {
-    icon: Public,
-    title: "Authentic Experiences",
-    desc: "Travel rooted in real stories, local culture, and genuine connections.",
+    icon: Globe,
+    title: "Authentic experiences",
+    desc: "Travel rooted in real stories, local culture and genuine connections.",
   },
   {
-    icon: VolunteerActivism,
-    title: "Responsible Tourism",
+    icon: HeartHandshake,
+    title: "Responsible tourism",
     desc: "Supporting communities and protecting the places we explore.",
   },
   {
-    icon: Diversity3,
-    title: "People First",
-    desc: "Every journey is designed with care, trust, and transparency.",
+    icon: Users,
+    title: "People first",
+    desc: "Every journey is designed with care, trust and transparency.",
   },
 ];
 
 export default function AboutUsCTA() {
-  // const sectionRef = useRef(null);
-  // const contentRef = useRef(null);
-  // const cardsRef = useRef(null);
-
-  // useEffect(() => {
-  //   const ctx = gsap.context(() => {
-  //     gsap.from(contentRef.current?.children, {
-  //       opacity: 0,
-  //       y: 50,
-  //       duration: 1,
-  //       stagger: 0.2,
-  //       ease: "power3.out",
-  //       scrollTrigger: {
-  //         trigger: sectionRef.current,
-  //         start: "top 85%",
-  //       },
-  //     });
-
-  //     gsap.from(cardsRef.current?.children, {
-  //       opacity: 0,
-  //       scale: 0.9,
-  //       duration: 0.8,
-  //       stagger: 0.15,
-  //       ease: "back.out(1.7)",
-  //       scrollTrigger: {
-  //         trigger: sectionRef.current,
-  //         start: "top 80%",
-  //       },
-  //     });
-  //   }, sectionRef);
-
-  //   return () => ctx.revert();
-  // }, []);
-
   return (
     <section
-      // ref={sectionRef}
       aria-labelledby="about-cta-heading"
-      className="relative overflow-hidden bg-slate-900"
+      className="section relative overflow-hidden bg-ink-900"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]"
+        className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[44rem] -translate-x-1/2 rounded-full bg-brand-600/20 blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-14">
-          <div className="space-y-5 sm:space-y-6">
-            <h2
-              id="about-cta-heading"
-              className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
-            >
-              More Than Travel,
-              <span className="block text-amber-400">We Create Meaningful Journeys</span>
-            </h2>
-
-            <p className="max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
-              Wonders of India was born from a deep love for culture, people, and
-              places. We believe travel should inspire connection, preserve heritage,
-              and leave a positive impact wherever you go.
-            </p>
-
-            <div className="flex flex-wrap gap-3 sm:gap-4 pt-2">
-              <Button
-                component={Link}
-                to="/contact"
-                variant="contained"
-                size="large"
-                startIcon={<Diversity3 />}
-                className="!rounded-2xl !bg-amber-400 !px-5 sm:!px-6 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !text-slate-900 !normal-case hover:!bg-amber-500"
-              >
-                Meet Our Team
-              </Button>
-
-              <Button
-                component="a"
-                href="#our-impact"
-                variant="outlined"
-                size="large"
-                startIcon={<Public />}
-                className="!rounded-2xl !border-amber-400 !px-5 sm:!px-6 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !text-amber-400 !normal-case hover:!border-amber-400 hover:!bg-amber-400/10"
-              >
-                Our Impact
-              </Button>
-            </div>
-          </div>
-
-          <div
-            id="our-impact"
-            className="grid grid-cols-1 gap-5 sm:gap-6 scroll-mt-28"
+      <div className="container-page relative grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <div>
+          <p className="eyebrow !text-brand-400">What we believe</p>
+          <h2
+            id="about-cta-heading"
+            className="section-title mt-3 !text-white text-balance"
           >
-            {VALUES.map(({ icon: Icon, title, desc }) => (
-              <article
-                key={title}
-                className="flex items-start gap-4 rounded-2xl bg-slate-800/80 p-6 shadow-xl backdrop-blur transition-all duration-300 hover:bg-slate-800 hover:-translate-y-1"
-              >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amber-400/10 border border-amber-400/20">
-                  <Icon fontSize="medium" className="text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">{title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-300">
-                    {desc}
-                  </p>
-                </div>
-              </article>
-            ))}
+            More than travel. We create meaningful journeys.
+          </h2>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-300 sm:text-lg">
+            Wonders of India was born from a love for culture, people and
+            places. We believe travel should inspire connection, preserve
+            heritage and leave a positive impact wherever you go.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link to="/contact" className="btn-primary">
+              <MessageCircle size={18} aria-hidden="true" />
+              Contact us
+            </Link>
+            <a
+              href="#our-values"
+              className="btn border border-white/30 text-white hover:bg-white/10"
+            >
+              <Globe size={18} aria-hidden="true" />
+              Our values
+            </a>
           </div>
         </div>
+
+        <ul id="our-values" className="scroll-mt-28 space-y-4">
+          {VALUES.map(({ icon: Icon, title, desc }) => (
+            <li
+              key={title}
+              className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-glow"
+              >
+                <Icon size={22} />
+              </span>
+              <div>
+                <h3 className="text-base font-bold text-white">{title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-ink-300">{desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

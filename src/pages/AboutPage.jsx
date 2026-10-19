@@ -1,27 +1,23 @@
-import React from "react";
 import Navbar from "../Components/Navbar";
-import { Banner3 } from "../assets/index";
-import Destination from "../Components/Destination";
+import AboutMe from "../Components/AboutMe";
+import Services from "../Components/Services";
+import AboutUsCTA from "../Components/AboutUSCTA";
 import Reviews from "../Components/Reviews";
 import Footer from "../Components/Footer";
-// import ContactUs from "../Components/ContactUs";
-import Services from "../Components/Services";
-import AboutMe from "../Components/AboutMe";
-import CTA from "../Components/CTA";
-import AboutUsCTA from "../Components/AboutUSCTA";
-const AboutPage = () => {
-  return (
-    <div>
-      <Navbar />
-      <AboutUsCTA/>
-       <AboutMe/>
-        <Services />
-      
+
+const AboutPage = () => (
+  <div className="min-h-screen bg-ink-50">
+    <Navbar />
+
+    <main className="pt-16 sm:pt-[72px]">
+      <AboutMe />
+      <Services />
+      <AboutUsCTA />
       <Reviews />
-      {/* <ContactUs /> */}
-      <Footer />
-    </div>
-  );
-};
+    </main>
+
+    <Footer />
+  </div>
+);
 
 export default AboutPage;

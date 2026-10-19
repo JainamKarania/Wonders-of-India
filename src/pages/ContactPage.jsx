@@ -1,18 +1,19 @@
-import React from 'react'
-import Navbar from '../Components/Navbar'
-import ContactUs from '../Components/ContactUs'
-import Footer from '../Components/Footer'
-import { ContactBanner } from '../assets/index'
-import ContactUsCTA from '../Components/ContactUsCTA'
-const ContactPage = () => {
-  return (
-    <div id='contact'>
-      <Navbar/>
-      <ContactUs/>
-      <ContactUsCTA/>
-      <Footer/>
-    </div>
-  )
-}
+import Navbar from "../Components/Navbar";
+import ContactUs from "../Components/ContactUs";
+import ContactUsCTA from "../Components/ContactUsCTA";
+import Footer from "../Components/Footer";
 
-export default ContactPage
+const ContactPage = () => (
+  <div id="contact" className="min-h-screen bg-ink-50">
+    <Navbar />
+
+    <main className="pt-16 sm:pt-[72px]">
+      <ContactUs />
+      <ContactUsCTA />
+    </main>
+
+    <Footer showCta={false} />
+  </div>
+);
+
+export default ContactPage;

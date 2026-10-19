@@ -1,72 +1,48 @@
-import React from "react";
 import { About } from "../assets/index";
 
-const AboutMe = () => {
-  return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-slate-950" aria-labelledby="about-heading">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center">
-          {/* Text Section */}
-          <article className="w-full">
-            <header className="mb-6">
-              <span className="block text-sm font-semibold uppercase tracking-widest text-orange-400 mb-3">
-                Our Story
-              </span>
-              <h2
-                id="about-heading"
-                className="text-2xl sm:text-4xl lg:text-5xl text-white font-bold leading-tight"
-              >
-                About Wonders of India
-              </h2>
-            </header>
+const AboutMe = () => (
+  <section className="section bg-white" aria-labelledby="about-heading">
+    <div className="container-page">
+      <div className="grid items-center gap-10 md:grid-cols-2 lg:gap-16">
+        <article>
+          <p className="eyebrow">Our story</p>
+          <h2 id="about-heading" className="section-title mt-3 text-balance">
+            About Wonders of India
+          </h2>
 
-            <p className="text-base sm:text-lg text-white/90 mb-5 leading-relaxed">
-              At our travel agency, we are committed to providing exceptional
-              travel experiences tailored to your preferences. From breathtaking
-              beach destinations to thrilling adventure tours, we offer a wide
-              range of options to suit every traveler.
+          <div className="mt-6 space-y-4 text-base leading-relaxed text-ink-600 sm:text-lg">
+            <p>
+              We plan travel experiences across India around what you actually
+              want, from beaches and hill stations to heritage cities and
+              adventure trips.
             </p>
-
-            <p className="text-base sm:text-lg text-white/70 mb-5 leading-relaxed">
-              Our easy-to-use website makes planning your dream vacation a
-              breeze. Browse through our extensive collection of destinations,
-              explore detailed information about each location, and book your
-              trip with confidence. With secure payment options and dedicated
-              customer support, we're here to ensure that your journey is smooth
-              and enjoyable.
+            <p>
+              Browse our destinations, read the details of each package and
+              book in a few steps. Your bookings stay in one place, and you can
+              change your boarding station or package before you travel.
             </p>
-
-            <p className="text-base sm:text-lg text-white/70 mb-5 leading-relaxed">
-              Our unique arrangements are crafted to turn your travel dreams into
-              reality, offering unmatched value and unforgettable experiences —
-              from discounted hotel stays and exclusive sightseeing tours to free
-              upgrades and added benefits.
-            </p>
-
-            <p className="text-base sm:text-lg text-white/70 leading-relaxed">
-              Whether you're a solo explorer, a couple seeking a romantic escape,
-              or a family planning a memorable vacation,{" "}
-              <strong className="text-orange-400 font-semibold">
+            <p>
+              Whether you're a solo explorer, a couple or a family, there's a
+              package for you.{" "}
+              <strong className="font-semibold text-brand-700">
                 Wonders of India
               </strong>{" "}
-              has the perfect package for you. Allow us to guide you through the
-              marvels of India.
+              will help you find it.
             </p>
-          </article>
+          </div>
+        </article>
 
-          {/* Image Section */}
-          <figure className="w-full">
-            <img
-              src={About}
-              alt="Travel experience by Wonders of India"
-              className="w-full aspect-[4/3] md:aspect-square lg:aspect-[4/3] object-cover rounded-2xl border border-white/10 shadow-lg"
-              loading="lazy"
-            />
-          </figure>
-        </div>
+        <figure>
+          <img
+            src={About}
+            alt="Travellers exploring India with Wonders of India"
+            loading="lazy"
+            className="aspect-[4/3] w-full rounded-3xl object-cover shadow-lift md:aspect-square lg:aspect-[4/3]"
+          />
+        </figure>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default AboutMe;

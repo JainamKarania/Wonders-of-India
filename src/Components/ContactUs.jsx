@@ -1,108 +1,90 @@
-import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-  TextField,
-  Button,
-  MenuItem,
-  Card,
-  CardContent,
-} from "@mui/material";
-import { Send, LocationOn, Call, Email } from "@mui/icons-material";
+import { Loader2, Mail, MapPin, Phone, Send } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+const CONTACT = {
+  address: "Bengaluru, Karnataka, India",
+  phoneDisplay: "+91 98765 43210",
+  phoneHref: "+919876543210",
+  email: "hello@wondersofindia.travel",
+};
 
 const CONTACT_INFO = [
+  { icon: MapPin, title: "Our office", value: CONTACT.address },
   {
-    icon: LocationOn,
-    title: "Our Office",
-    desc: "Bengaluru, Karnataka, India",
+    icon: Phone,
+    title: "Call us",
+    value: CONTACT.phoneDisplay,
+    href: `tel:${CONTACT.phoneHref}`,
   },
   {
-    icon: Call,
-    title: "Call Us",
-    desc: "+91 98765 43210",
-  },
-  {
-    icon: Email,
-    title: "Email Us",
-    desc: "support@wondersofindia.com",
+    icon: Mail,
+    title: "Email us",
+    value: CONTACT.email,
+    href: `mailto:${CONTACT.email}`,
   },
 ];
 
-const EMPTY_FORM = {
-  name: "",
-  email: "",
-  phone: "",
-  subject: "",
-  message: "",
-};
+const SUBJECTS = ["General Inquiry", "Custom Trip", "Booking Support", "Partnership"];
+const EMPTY_FORM = { name: "", email: "", phone: "", subject: "", message: "" };
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validate(form) {
+  const errors = {};
+  if (!form.name.trim()) errors.name = "Enter your name";
+  if (!form.email.trim()) errors.email = "Enter your email";
+  else if (!EMAIL_REGEX.test(form.email)) errors.email = "Enter a valid email address";
+  if (!form.phone.trim()) errors.phone = "Enter your phone number";
+  else if (form.phone.replace(/\D/g, "").length < 10) errors.phone = "Enter a valid phone number";
+  if (!form.subject) errors.subject = "Choose a subject";
+  if (!form.message.trim()) errors.message = "Write a short message";
+  return errors;
+}
+
+function Field({ id, label, error, children }) {
+  return (
+    <div>
+      <label htmlFor={id} className="label">
+        {label}
+      </label>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} className="mt-1 text-xs font-medium text-red-600">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 export default function Contact() {
-  const sectionRef = useRef(null);
-  const headerRef = useRef(null);
-  const formRef = useRef(null);
-  const infoRef = useRef(null);
-
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(headerRef.current?.children, {
-        opacity: 0,
-        y: 40,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 85%",
-        },
-      });
-
-      gsap.from(formRef.current, {
-        opacity: 0,
-        x: -40,
-        duration: 0.9,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
-
-      gsap.from(infoRef.current?.children, {
-        opacity: 0,
-        y: 30,
-        duration: 0.7,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const found = validate(formData);
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+
     setSubmitting(true);
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/contact`,
-        formData
-      );
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/contact`, {
+        ...formData,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        message: formData.message.trim(),
+      });
 
       if (!res.data.success) throw new Error(res.data.message);
 
@@ -111,135 +93,110 @@ export default function Contact() {
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "Failed to send message. Please try again."
+        err.response?.data?.message || "Failed to send your message. Please try again."
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  return (
-    <section
-      ref={sectionRef}
-      aria-labelledby="contact-heading"
-      className="relative overflow-hidden bg-slate-50"
-    >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_top_left,white,transparent_70%)]"
-      />
+  const inputProps = (name) => ({
+    id: name,
+    name,
+    value: formData[name],
+    onChange: handleChange,
+    "aria-invalid": errors[name] ? "true" : undefined,
+    "aria-describedby": errors[name] ? `${name}-error` : undefined,
+    className: `input ${errors[name] ? "!border-red-400 focus:!ring-red-200" : ""}`,
+  });
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24">
-        <header
-          ref={headerRef}
-          className="mx-auto max-w-3xl text-center space-y-4"
-        >
-          <h2
-            id="contact-heading"
-            className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl"
-          >
-            Get in Touch With Us
+  return (
+    <section aria-labelledby="contact-heading" className="section bg-ink-50">
+      <div className="container-page">
+        <header className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow">Contact</p>
+          <h2 id="contact-heading" className="section-title mt-3 text-balance">
+            Get in touch with us
           </h2>
-          <p className="text-base text-slate-600 sm:text-lg">
-            Have questions or need a custom travel plan? Our experts at Wonders of
-            India are happy to help you.
+          <p className="section-subtitle mx-auto">
+            Have a question or want a custom travel plan? Send us a message and
+            we'll get back to you.
           </p>
         </header>
 
-        <div className="mt-12 sm:mt-16 grid gap-10 sm:gap-12 lg:grid-cols-2">
-          <Card
-            ref={formRef}
-            elevation={0}
-            className="rounded-2xl border border-slate-200 bg-white shadow-sm"
-          >
-            <CardContent className="p-5 sm:p-8">
-              <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-                <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
-                  <TextField
-                    label="Full Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    fullWidth
-                  />
-                  <TextField
-                    label="Email Address"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    fullWidth
-                  />
-                </div>
+        <div className="mt-10 grid gap-8 sm:mt-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-10">
+          <form onSubmit={handleSubmit} noValidate className="card space-y-5 p-5 sm:p-8">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field id="name" label="Full name" error={errors.name}>
+                <input {...inputProps("name")} autoComplete="name" />
+              </Field>
+              <Field id="email" label="Email address" error={errors.email}>
+                <input {...inputProps("email")} type="email" autoComplete="email" />
+              </Field>
+            </div>
 
-                <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
-                  <TextField
-                    label="Phone Number"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    fullWidth
-                  />
-                  <TextField
-                    select
-                    label="Subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    fullWidth
-                  >
-                    <MenuItem value="General Inquiry">General Inquiry</MenuItem>
-                    <MenuItem value="Custom Trip">Custom Trip</MenuItem>
-                    <MenuItem value="Booking Support">Booking Support</MenuItem>
-                    <MenuItem value="Partnership">Partnership</MenuItem>
-                  </TextField>
-                </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field id="phone" label="Phone number" error={errors.phone}>
+                <input {...inputProps("phone")} type="tel" autoComplete="tel" />
+              </Field>
+              <Field id="subject" label="Subject" error={errors.subject}>
+                <select {...inputProps("subject")}>
+                  <option value="">Select a subject</option>
+                  {SUBJECTS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
 
-                <TextField
-                  label="Message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  multiline
-                  rows={4}
-                  fullWidth
-                />
+            <Field id="message" label="Message" error={errors.message}>
+              <textarea {...inputProps("message")} rows={5} className={`${inputProps("message").className} resize-y`} />
+            </Field>
 
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  disabled={submitting}
-                  startIcon={<Send />}
-                  className="!rounded-2xl !bg-slate-900 !px-6 sm:!px-8 !py-2.5 sm:!py-3 !text-sm sm:!text-base !font-semibold !normal-case hover:!bg-black"
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                  Sending…
+                </>
+              ) : (
+                <>
+                  <Send size={18} aria-hidden="true" />
+                  Send message
+                </>
+              )}
+            </button>
+          </form>
+
+          <aside className="space-y-4">
+            {CONTACT_INFO.map(({ icon: Icon, title, value, href }) => (
+              <div key={title} className="card flex items-start gap-4 p-5">
+                <span
+                  aria-hidden="true"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700"
                 >
-                  {submitting ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <aside ref={infoRef} className="space-y-5 sm:space-y-6">
-            {CONTACT_INFO.map(({ icon: Icon, title, desc }) => (
-              <article
-                key={title}
-                className="flex items-start gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-sm"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-100">
-                  <Icon className="text-orange-600" />
+                  <Icon size={22} />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-ink-900">{title}</h3>
+                  {href ? (
+                    <a
+                      href={href}
+                      className="mt-1 block break-words text-sm text-ink-600 hover:text-brand-700 hover:underline"
+                    >
+                      {value}
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-sm text-ink-600">{value}</p>
+                  )}
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-600">{desc}</p>
-                </div>
-              </article>
+              </div>
             ))}
           </aside>
         </div>

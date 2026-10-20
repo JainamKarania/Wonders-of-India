@@ -11,7 +11,7 @@ import {
   Phone,
   RefreshCw,
 } from "lucide-react";
-import { useAuth } from "../Components/context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import RecommendedDestinations from "../recommendations/RecommendedDestinations";
 

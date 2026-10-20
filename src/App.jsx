@@ -7,21 +7,21 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-import HomeScreen from "./Components/HomeScreen";
+import HomeScreen from "./Components/HomeScreen.jsx";
 import ProtectedRoute from "./Components/routes/ProtectedRoute.jsx";
 import ChatWidget from "./chat/ChatWidget.jsx";
 
-const AboutPage = lazy(() => import("./pages/AboutPage"));
-const BookingPage = lazy(() => import("./pages/BookingPage"));
-const ContactPage = lazy(() => import("./pages/ContactPage"));
-const DestinationPage = lazy(() => import("./pages/DestinationPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
+const BookingPage = lazy(() => import("./pages/BookingPage.jsx"));
+const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
+const DestinationPage = lazy(() => import("./pages/DestinationPage.jsx"));
 const BookingHistoryPage = lazy(() => import("./pages/BookingHistoryPage.jsx"));
 const TransactionHistoryPage = lazy(() =>
   import("./pages/TransactionHistoryPage.jsx")
 );
 const UserProfilePage = lazy(() => import("./pages/UserProfilePage.jsx"));
 const ChatPage = lazy(() => import("./pages/ChatPage.jsx"));
-const Auth = lazy(() => import("./Components/auth/Auth"));
+const Auth = lazy(() => import("./Components/auth/Auth.jsx"));
 const BookingForm = lazy(() => import("./booking/BookingForm.jsx"));
 
 const HIDE_WIDGET_ON = ["/chat", "/auth"];

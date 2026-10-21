@@ -1,16 +1,1 @@
-import { REVIEWS_DATA } from "../../data/reviews.data.js";
-
-export default function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({
-      success: false,
-      message: "Method not allowed",
-    });
-  }
-
-  return res.status(200).json({
-    success: true,
-    count: REVIEWS_DATA.length,
-    data: REVIEWS_DATA,
-  });
-}
+export { default } from "../../server/routes/reviews.js";

@@ -3,8 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 import { db } from "../db/client.js";
 import { destinations, bookings } from "../db/schema.js";
 import { getUserFromRequest } from "../lib/supabaseAdmin.js";
-import { TOOL_DECLARATIONS, runTool } from "../lib/chatTools.js";
-import { runAgent } from "../lib/agent.js";
 
 const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -50,7 +48,6 @@ export default async function handler(req, res) {
     const destinationsPromise = findRelevantDestinations(message);
 
     const user = await userPromise;
-    console.log(`[chat] user=${user ? "yes" : "no"}, auth ${Date.now() - startedAt}ms`);
     const bookingsPromise = user
       ? getUserBookings(user.id).catch(() => [])
       : Promise.resolve([]);
@@ -71,59 +68,18 @@ export default async function handler(req, res) {
       { role: "user", parts: [{ text: message }] },
     ];
 
-    const ctx = { db, user, actions: [] };
-
-    const config = {
-      systemInstruction: systemPrompt,
-      ...(user ? { tools: [{ functionDeclarations: TOOL_DECLARATIONS }] } : {}),
-    };
-
-    const result = await runAgent({
-      contents,
-      config,
-      generate: async (params) => {
-        const t0 = Date.now();
-        try {
-          const out = await generateWithRetry({ model: CHAT_MODEL, ...params }, remaining);
-          console.log(
-            `[chat] gemini ok ${Date.now() - t0}ms, calls=${out.functionCalls?.length ?? 0}, elapsed=${Date.now() - startedAt}ms`
-          );
-          return out;
-        } catch (err) {
-          console.error(
-            `[chat] gemini failed after ${Date.now() - t0}ms, elapsed=${Date.now() - startedAt}ms:`,
-            err?.name,
-            err?.message
-          );
-          throw err;
-        }
+    const response = await generateWithRetry(
+      {
+        model: CHAT_MODEL,
+        contents,
+        config: { systemInstruction: systemPrompt },
       },
-      runTool: async (name, args) => {
-        const t0 = Date.now();
-        const out = await runTool(name, args, ctx);
-        console.log(`[chat] tool ${name} ${Date.now() - t0}ms`);
-        return out;
-      },
-    });
-
-    if (!result.finished) {
-      return res.status(200).json({
-        success: true,
-        reply: "I couldn't finish that. Could you tell me exactly what you'd like to do?",
-        actions: [],
-      });
-    }
-
-    const reply =
-      result.text.trim() ||
-      (ctx.actions.length > 0
-        ? "I've prepared this for you. Please review it below and confirm."
-        : "Sorry, I couldn't come up with an answer. Please try again.");
+      remaining
+    );
 
     return res.status(200).json({
       success: true,
-      reply,
-      actions: ctx.actions,
+      reply: response.text,
     });
   } catch (err) {
     console.error(err);
@@ -249,9 +205,7 @@ async function getRelevantDestinations(queryEmbedding) {
 async function getUserBookings(userId) {
   return db
     .select({
-      id: bookings.id,
       destinationTitle: destinations.title,
-      fromCity: bookings.fromCity,
       travelDate: bookings.travelDate,
       status: bookings.status,
       totalPrice: bookings.totalPrice,
@@ -281,9 +235,7 @@ function buildSystemPrompt(relevantDestinations, userBookings, user) {
       ? userBookings
           .map(
             (b) =>
-              `- WOI-${String(b.id).padStart(6, "0")}: ${b.destinationTitle}${
-                b.fromCity ? ` from ${b.fromCity}` : ""
-              }, travel date ${new Date(
+              `- ${b.destinationTitle}, travel date ${new Date(
                 b.travelDate
               ).toDateString()}, status: ${b.status}, total ₹${b.totalPrice}`
           )
@@ -296,16 +248,6 @@ Relevant destinations for this conversation:
 ${destinationsBlock || "(no closely matching destinations found)"}
 
 ${
-  user
-    ? `You can help this user manage bookings with your tools.
-Rules for bookings:
-- You can change a confirmed booking's boarding station or package, or cancel a confirmed booking. You cannot change travel dates or travellers, create bookings, or refund anything.
-- If it is unclear which booking the user means, ask. Never guess between bookings.
-- To switch package, find its id with list_destinations. Only offer packages that exist there.
-- propose_change_trip and propose_cancel_booking only prepare a confirmation card. Nothing happens until the user presses the button. Never say a change or cancellation is done. After calling one, briefly say what you prepared and ask them to review and confirm below.
-- Keep replies short and do not repeat the details the card already shows.\n\n`
-    : ""
-}${
   user
     ? bookingsBlock
       ? `This user is logged in as ${user.email} and has these bookings:\n${bookingsBlock}`

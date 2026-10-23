@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle2, Loader2, Send, Sparkles, User } from "lucide-react";
+import { Send, Sparkles, User } from "lucide-react";
 import { useChat } from "./useChat";
 
 const SUGGESTIONS = [
   "Suggest a 5-day trip in Rajasthan",
   "Which packages are under ₹30,000?",
   "Show my upcoming bookings",
-  "Change my boarding station",
+  "Best time to visit Kerala?",
 ];
 
 const MAX_INPUT_HEIGHT = 120;
@@ -75,86 +75,8 @@ function Avatar({ isUser }) {
   );
 }
 
-function ActionCard({ action, onConfirm, onDismiss }) {
-  const { status } = action;
-  const busy = status === "confirming";
-  const settled = status === "done" || status === "dismissed";
-
-  return (
-    <div
-      className={`mt-2 w-full max-w-[80%] rounded-2xl border bg-white p-4 text-sm shadow-soft ${
-        action.destructive ? "border-red-200" : "border-brand-200"
-      }`}
-    >
-      <p className="font-semibold text-ink-900">{action.title}</p>
-
-      <dl className="mt-3 space-y-2">
-        {action.lines.map((line) => (
-          <div key={line.label}>
-            <dt className="text-xs font-medium uppercase tracking-wide text-ink-500">
-              {line.label}
-            </dt>
-            <dd className="mt-0.5 text-ink-800">
-              {line.value !== undefined ? (
-                line.value
-              ) : (
-                <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <span className="text-ink-500 line-through">{line.from}</span>
-                  <ArrowRight size={14} aria-hidden="true" className="text-ink-400" />
-                  <span className="font-medium">{line.to}</span>
-                </span>
-              )}
-            </dd>
-          </div>
-        ))}
-      </dl>
-
-      {status === "failed" && (
-        <p role="alert" className="mt-3 text-xs text-red-600">
-          {action.error}
-        </p>
-      )}
-
-      {status === "done" && (
-        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-          <CheckCircle2 size={14} aria-hidden="true" />
-          Confirmed
-        </p>
-      )}
-
-      {status === "dismissed" && (
-        <p className="mt-3 text-xs font-medium text-ink-500">Dismissed</p>
-      )}
-
-      {!settled && (
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            onClick={() => onConfirm(action)}
-            disabled={busy}
-            className={`btn flex-1 ${action.destructive ? "btn-danger" : "btn-primary"}`}
-          >
-            {busy ? (
-              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-            ) : null}
-            {status === "failed" ? "Try again" : action.confirmLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => onDismiss(action)}
-            disabled={busy}
-            className="btn btn-outline"
-          >
-            Not now
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function ChatWindow({ autoFocus = false }) {
-  const { messages, sending, sendMessage, confirmAction, dismissAction } = useChat();
+  const { messages, sending, sendMessage } = useChat();
   const [input, setInput] = useState("");
   const listRef = useRef(null);
   const inputRef = useRef(null);
@@ -211,35 +133,26 @@ export default function ChatWindow({ autoFocus = false }) {
           const isUser = m.role === "user";
 
           return (
-            <div key={i}>
-              <div className={`flex items-start gap-2.5 ${isUser ? "flex-row-reverse" : ""}`}>
-                <Avatar isUser={isUser} />
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                    isUser
-                      ? "rounded-tr-md bg-ink-800 text-white"
-                      : m.isError
-                      ? "rounded-tl-md border border-red-100 bg-red-50 text-red-700"
-                      : "rounded-tl-md bg-ink-50 text-ink-800"
-                  }`}
-                >
-                  {isUser ? (
-                    <span className="whitespace-pre-wrap break-words">{m.text}</span>
-                  ) : (
-                    <FormattedText text={m.text ?? ""} />
-                  )}
-                </div>
+            <div
+              key={i}
+              className={`flex items-start gap-2.5 ${isUser ? "flex-row-reverse" : ""}`}
+            >
+              <Avatar isUser={isUser} />
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                  isUser
+                    ? "rounded-tr-md bg-ink-800 text-white"
+                    : m.isError
+                    ? "rounded-tl-md border border-red-100 bg-red-50 text-red-700"
+                    : "rounded-tl-md bg-ink-50 text-ink-800"
+                }`}
+              >
+                {isUser ? (
+                  <span className="whitespace-pre-wrap break-words">{m.text}</span>
+                ) : (
+                  <FormattedText text={m.text ?? ""} />
+                )}
               </div>
-
-              {m.actions?.map((action) => (
-                <div key={action.id} className="pl-[42px]">
-                  <ActionCard
-                    action={action}
-                    onConfirm={confirmAction}
-                    onDismiss={dismissAction}
-                  />
-                </div>
-              ))}
             </div>
           );
         })}

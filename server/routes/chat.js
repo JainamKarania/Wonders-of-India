@@ -10,7 +10,7 @@ const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const EMBED_MODEL = "voyage-4-lite";
 const EMBED_DIMENSIONS = 1024;
-const CHAT_MODEL = "gemini-3.8-flash";
+const CHAT_MODEL = "gemini-2.5-flash";
 const TOP_K_DESTINATIONS = 5;
 const MAX_HISTORY_TURNS = 10;
 
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
 
     const config = {
       systemInstruction: systemPrompt,
-      // ...(user ? { tools: [{ functionDeclarations: TOOL_DECLARATIONS }] } : {}),
+      ...(user ? { tools: [{ functionDeclarations: TOOL_DECLARATIONS }] } : {}),
     };
 
     const result = await runAgent({

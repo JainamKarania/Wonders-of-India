@@ -50,6 +50,7 @@ export default async function handler(req, res) {
     const destinationsPromise = findRelevantDestinations(message);
 
     const user = await userPromise;
+    console.log(`[chat] user=${user ? "yes" : "no"}, auth ${Date.now() - startedAt}ms`);
     const bookingsPromise = user
       ? getUserBookings(user.id).catch(() => [])
       : Promise.resolve([]);
@@ -80,9 +81,29 @@ export default async function handler(req, res) {
     const result = await runAgent({
       contents,
       config,
-      generate: (params) =>
-        generateWithRetry({ model: CHAT_MODEL, ...params }, remaining),
-      runTool: (name, args) => runTool(name, args, ctx),
+      generate: async (params) => {
+        const t0 = Date.now();
+        try {
+          const out = await generateWithRetry({ model: CHAT_MODEL, ...params }, remaining);
+          console.log(
+            `[chat] gemini ok ${Date.now() - t0}ms, calls=${out.functionCalls?.length ?? 0}, elapsed=${Date.now() - startedAt}ms`
+          );
+          return out;
+        } catch (err) {
+          console.error(
+            `[chat] gemini failed after ${Date.now() - t0}ms, elapsed=${Date.now() - startedAt}ms:`,
+            err?.name,
+            err?.message
+          );
+          throw err;
+        }
+      },
+      runTool: async (name, args) => {
+        const t0 = Date.now();
+        const out = await runTool(name, args, ctx);
+        console.log(`[chat] tool ${name} ${Date.now() - t0}ms`);
+        return out;
+      },
     });
 
     if (!result.finished) {

@@ -20,6 +20,7 @@ const TIME_BUDGET_MS = 25000;
 const EMBED_TIMEOUT_MS = 4000;
 const MIN_TIME_FOR_RETRY_MS = 6000;
 const MAX_RETRIES = 2;
+const ATTEMPT_TIMEOUT_MS = 10000;
 
 const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
@@ -149,12 +150,16 @@ async function generateWithRetry(params, remaining, attempt = 0) {
     throw err;
   }
 
+  // One slow attempt must not use up the whole budget, or there is nothing
+  // left to retry with.
+  const attemptTimeout = Math.min(ATTEMPT_TIMEOUT_MS, timeLeft - 500);
+
   try {
     return await genAI.models.generateContent({
       ...params,
       config: {
         ...params.config,
-        abortSignal: AbortSignal.timeout(timeLeft - 500),
+        abortSignal: AbortSignal.timeout(attemptTimeout),
       },
     });
   } catch (err) {
@@ -164,10 +169,18 @@ async function generateWithRetry(params, remaining, attempt = 0) {
       err?.error?.code === 503 ||
       /UNAVAILABLE|high demand/i.test(err?.message ?? "");
 
-    if (isOverloaded && attempt < MAX_RETRIES && remaining() > MIN_TIME_FOR_RETRY_MS) {
-      const waitMs = 1000 * (attempt + 1);
-      console.log(`Gemini overloaded — retrying in ${waitMs}ms (retry ${attempt + 1})`);
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    const isStalled = err?.name === "AbortError" || err?.name === "TimeoutError";
+
+    if (
+      (isOverloaded || isStalled) &&
+      attempt < MAX_RETRIES &&
+      remaining() > MIN_TIME_FOR_RETRY_MS
+    ) {
+      const waitMs = isOverloaded ? 1000 * (attempt + 1) + Math.random() * 400 : 0;
+      console.log(
+        `Gemini ${isOverloaded ? "overloaded" : "stalled"}, retrying in ${Math.round(waitMs)}ms (retry ${attempt + 1})`
+      );
+      if (waitMs) await new Promise((resolve) => setTimeout(resolve, waitMs));
       return generateWithRetry(params, remaining, attempt + 1);
     }
 

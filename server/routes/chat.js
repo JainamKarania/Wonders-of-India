@@ -75,6 +75,7 @@ export default async function handler(req, res) {
 
     const config = {
       systemInstruction: systemPrompt,
+      thinkingConfig: { thinkingLevel: "low" },
       ...(user ? { tools: [{ functionDeclarations: TOOL_DECLARATIONS }] } : {}),
     };
 

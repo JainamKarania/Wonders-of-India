@@ -14,6 +14,7 @@ const CHAT_MODEL = "gemini-3.5-flash-lite";
 const TOP_K_DESTINATIONS = 5;
 const MAX_HISTORY_TURNS = 10;
 
+
 const TIME_BUDGET_MS = 25000;
 const EMBED_TIMEOUT_MS = 4000;
 const MIN_TIME_FOR_RETRY_MS = 6000;
